@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "../service;proto";
+
+message Mygepcrequest{
+    string request = 1;
+}
+
+message MygepcResponse{
+    string response = 1;
+}
+
+service Course{
+    rpc MyTest(Mygepcrequest)returns(MygepcResponse){}
+}
+
+
