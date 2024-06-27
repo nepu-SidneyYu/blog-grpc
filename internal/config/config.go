@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nepu-SidneyYu/blog-grpc/internal/logs"
 	"gopkg.in/yaml.v3"
 )
 
