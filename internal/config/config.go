@@ -14,7 +14,7 @@ type Config struct {
 }
 
 var (
-	_config *Config
+	_config Config
 )
 
 type JWTConfig struct {
@@ -22,11 +22,12 @@ type JWTConfig struct {
 
 type MySqlConfig struct {
 	// 数据库连接信息
-	Host     string
-	Port     int
-	Username string
-	Password string
-	Database string
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	Database string `yaml:"database"`
+	Charset  string `yaml:"charset"`
 }
 
 func LoadConfig() {
@@ -38,4 +39,8 @@ func LoadConfig() {
 	if err != nil {
 		fmt.Printf("umarshall数据失败：%#v\n", err)
 	}
+}
+
+func GetConfig() Config {
+	return _config
 }
