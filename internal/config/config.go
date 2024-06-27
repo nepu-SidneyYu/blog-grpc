@@ -1,16 +1,22 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"os"
 
+	"github.com/nepu-SidneyYu/blog-grpc/internal/logs"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 )
 
 // Config结构体，包含MySqlConfig字段
 type Config struct {
 	// MySql字段，指向MySqlConfig结构体
-	MySql *MySqlConfig
+	MySql MySqlConfig `yaml:"mysql"`
+	//jwt字段
+	JWt   JWTConfig   `yaml:"jwt"`
+	Redis RedisConfig `yaml:"redis"`
 }
 
 var (
@@ -18,6 +24,9 @@ var (
 )
 
 type JWTConfig struct {
+	Secret string `yaml:"secret"`
+	Expire int64  `yaml:"expire"` // hour
+	Issuer string `yaml:"issuer"`
 }
 
 type MySqlConfig struct {
@@ -29,16 +38,22 @@ type MySqlConfig struct {
 	Database string `yaml:"database"`
 	Charset  string `yaml:"charset"`
 }
+type RedisConfig struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	Password string `yaml:"password"`
+	DB       int    `yaml:"db"`
+}
 
 func LoadConfig() {
-	data, err := os.ReadFile("./conf.yaml")
+	data, err := os.ReadFile("conf.yaml")
 	if err != nil {
-		fmt.Printf("读取yaml文件错误：%#v\n", err)
-		//logs.Fatal("读取yaml文件错误：%#v", err)
+		logs.Fatal(context.Background(), "read yaml failed", zap.String("error", err.Error()))
 	}
+	fmt.Printf("%s\n", string(data))
 	err = yaml.Unmarshal(data, &_config)
 	if err != nil {
-		fmt.Printf("umarshall数据失败：%#v\n", err)
+		logs.Fatal(context.Background(), "unmarshal yaml failed", zap.String("error", err.Error()))
 	}
 }
 

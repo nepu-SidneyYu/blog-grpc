@@ -1,11 +1,16 @@
-JWT:
-  Secret: "abc123321"
-  Expire: 24 # hour
-  Issuer: "blog"
-Mysql:
+jwt:
+  secret: "abc123321"
+  expire: 24 # hour
+  issuer: "blog"
+mysql:
   host: "192.168.184.129"
-  port: "3306"
+  port: 3306
   charSet: "charset=utf8mb4&parseTime=True&loc=Local" # 其他配置, 例如时区
   database: "gvb"
   username: "root"
   password: "123456"
+redis:
+  db: 7
+  host: ""
+  port:
+  password: ''
