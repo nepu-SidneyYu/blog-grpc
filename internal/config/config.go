@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/nepu-SidneyYu/blog-grpc/internal/logs"
 	"gopkg.in/yaml.v3"
 )
 
@@ -34,7 +35,7 @@ func LoadConfig() {
 	data, err := os.ReadFile("./conf.yaml")
 	if err != nil {
 		fmt.Printf("读取yaml文件错误：%#v\n", err)
-		logs.Fatal("读取yaml文件错误：%#v", err)
+		//logs.Fatal("读取yaml文件错误：%#v", err)
 	}
 	err = yaml.Unmarshal(data, &_config)
 	if err != nil {
