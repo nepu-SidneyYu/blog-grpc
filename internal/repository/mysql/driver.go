@@ -23,7 +23,7 @@ func Init() {
 		var err error
 		conf := config.GetConfig().MySql
 
-		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s", conf.Username, conf.Password, conf.Host, conf.Port, conf.Database, conf.Charset)
+		dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?%s", conf.Username, conf.Password, conf.Host, conf.Port, conf.Database, conf.Charset)
 		_db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Info),
 		})

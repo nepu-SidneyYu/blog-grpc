@@ -1,11 +1,10 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/nepu-SidneyYu/blog-grpc/internal/config"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/loger"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/logs"
+	"github.com/nepu-SidneyYu/blog-grpc/internal/repository"
 )
 
 func main() {
@@ -15,8 +14,10 @@ func main() {
 
 	//读取配置文件
 	config.LoadConfig()
-	conf := config.GetConfig()
-	fmt.Println(conf)
+
+	//数据库初始化
+	repository.Init()
+
 	//启动服务
 	return
 }
