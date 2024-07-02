@@ -19,90 +19,128 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	Course_MyTest_FullMethodName = "/proto.Course/MyTest"
+	User_Login_FullMethodName    = "/proto.User/Login"
+	User_Register_FullMethodName = "/proto.User/Register"
 )
 
-// CourseClient is the client API for Course service.
+// UserClient is the client API for User service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type CourseClient interface {
-	MyTest(ctx context.Context, in *Mygepcrequest, opts ...grpc.CallOption) (*MygepcResponse, error)
+type UserClient interface {
+	Login(ctx context.Context, in *UserLoginRequest, opts ...grpc.CallOption) (*UserLoginResponse, error)
+	Register(ctx context.Context, in *UserRegisterRequest, opts ...grpc.CallOption) (*UserRegisterResponse, error)
 }
 
-type courseClient struct {
+type userClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewCourseClient(cc grpc.ClientConnInterface) CourseClient {
-	return &courseClient{cc}
+func NewUserClient(cc grpc.ClientConnInterface) UserClient {
+	return &userClient{cc}
 }
 
-func (c *courseClient) MyTest(ctx context.Context, in *Mygepcrequest, opts ...grpc.CallOption) (*MygepcResponse, error) {
+func (c *userClient) Login(ctx context.Context, in *UserLoginRequest, opts ...grpc.CallOption) (*UserLoginResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(MygepcResponse)
-	err := c.cc.Invoke(ctx, Course_MyTest_FullMethodName, in, out, cOpts...)
+	out := new(UserLoginResponse)
+	err := c.cc.Invoke(ctx, User_Login_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// CourseServer is the server API for Course service.
-// All implementations must embed UnimplementedCourseServer
+func (c *userClient) Register(ctx context.Context, in *UserRegisterRequest, opts ...grpc.CallOption) (*UserRegisterResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UserRegisterResponse)
+	err := c.cc.Invoke(ctx, User_Register_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// UserServer is the server API for User service.
+// All implementations must embed UnimplementedUserServer
 // for forward compatibility
-type CourseServer interface {
-	MyTest(context.Context, *Mygepcrequest) (*MygepcResponse, error)
-	mustEmbedUnimplementedCourseServer()
+type UserServer interface {
+	Login(context.Context, *UserLoginRequest) (*UserLoginResponse, error)
+	Register(context.Context, *UserRegisterRequest) (*UserRegisterResponse, error)
+	mustEmbedUnimplementedUserServer()
 }
 
-// UnimplementedCourseServer must be embedded to have forward compatible implementations.
-type UnimplementedCourseServer struct {
+// UnimplementedUserServer must be embedded to have forward compatible implementations.
+type UnimplementedUserServer struct {
 }
 
-func (UnimplementedCourseServer) MyTest(context.Context, *Mygepcrequest) (*MygepcResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method MyTest not implemented")
+func (UnimplementedUserServer) Login(context.Context, *UserLoginRequest) (*UserLoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
-func (UnimplementedCourseServer) mustEmbedUnimplementedCourseServer() {}
+func (UnimplementedUserServer) Register(context.Context, *UserRegisterRequest) (*UserRegisterResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+}
+func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
 
-// UnsafeCourseServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to CourseServer will
+// UnsafeUserServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to UserServer will
 // result in compilation errors.
-type UnsafeCourseServer interface {
-	mustEmbedUnimplementedCourseServer()
+type UnsafeUserServer interface {
+	mustEmbedUnimplementedUserServer()
 }
 
-func RegisterCourseServer(s grpc.ServiceRegistrar, srv CourseServer) {
-	s.RegisterService(&Course_ServiceDesc, srv)
+func RegisterUserServer(s grpc.ServiceRegistrar, srv UserServer) {
+	s.RegisterService(&User_ServiceDesc, srv)
 }
 
-func _Course_MyTest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Mygepcrequest)
+func _User_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserLoginRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CourseServer).MyTest(ctx, in)
+		return srv.(UserServer).Login(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Course_MyTest_FullMethodName,
+		FullMethod: User_Login_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CourseServer).MyTest(ctx, req.(*Mygepcrequest))
+		return srv.(UserServer).Login(ctx, req.(*UserLoginRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Course_ServiceDesc is the grpc.ServiceDesc for Course service.
+func _User_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserRegisterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).Register(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: User_Register_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).Register(ctx, req.(*UserRegisterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// User_ServiceDesc is the grpc.ServiceDesc for User service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Course_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.Course",
-	HandlerType: (*CourseServer)(nil),
+var User_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.User",
+	HandlerType: (*UserServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "MyTest",
-			Handler:    _Course_MyTest_Handler,
+			MethodName: "Login",
+			Handler:    _User_Login_Handler,
+		},
+		{
+			MethodName: "Register",
+			Handler:    _User_Register_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

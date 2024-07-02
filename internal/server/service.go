@@ -10,5 +10,5 @@ type Server struct {
 
 func (*Server) Servvice() {
 	server := grpc.NewServer()
-	proto.RegisterCourseServer(server, nil)
+
 }
