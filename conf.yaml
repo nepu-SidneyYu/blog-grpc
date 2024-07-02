@@ -1,3 +1,4 @@
+port: 6666
 jwt:
   secret: "abc123321"
   expire: 24 # hour

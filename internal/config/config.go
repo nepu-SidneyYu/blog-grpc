@@ -12,6 +12,7 @@ import (
 
 // Config结构体，包含MySqlConfig字段
 type Config struct {
+	Port int `yaml:"port"`
 	// MySql字段，指向MySqlConfig结构体
 	MySql MySqlConfig `yaml:"mysql"`
 	//jwt字段
@@ -25,7 +26,7 @@ var (
 
 type JWTConfig struct {
 	Secret string `yaml:"secret"`
-	Expire int64  `yaml:"expire"` // hour
+	Expire int32  `yaml:"expire"` // hour
 	Issuer string `yaml:"issuer"`
 }
 

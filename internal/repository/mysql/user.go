@@ -11,8 +11,13 @@ func NewUser() *User {
 }
 
 func (u *User) GetUserByName(name string) (*model.UserAuth, error) {
-	_db.Model(&model.UserAuth{})
+	var userauth *model.UserAuth
+	tx := _db.Model(&model.UserAuth{Username: name}).First(&userauth)
 	// 根据id查询用户信息
 	// 返回一个User结构体和一个错误信息
-	return nil, nil
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return userauth, nil
 }
