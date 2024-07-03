@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package proto;
 
-option go_package = "proto/blogFront;proto";
+option go_package = "proto/blog;proto";
 
 message UserLoginRequest {
     string username = 1;
@@ -40,22 +40,8 @@ message UserRegisterResponse{
 }
 
 
-// message UserLogoutRequest{
-//     string token = 1;
-// }
-
-// message UserInfoRequest{
-//     string username = 1;
-// }
-
-// message UserInfoResponse{
-//     string username = 1;
-//     string password = 2;
-// }
-
-
 service User{
-    rpc Login(UserLoginRequest) returns (UserLoginResponse){}
+    rpc UserLogin(UserLoginRequest) returns (UserLoginResponse){}
     rpc Register(UserRegisterRequest) returns (UserRegisterResponse){}
     // rpc Logout(UserLogoutRequest) returns (UserLoginResponse){}
     // rpc GetInfo(UserInfoRequest) returns (UserInfoResponse){}

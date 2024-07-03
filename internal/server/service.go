@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/nepu-SidneyYu/blog-grpc/internal/business"
+	"github.com/nepu-SidneyYu/blog-grpc/internal/config"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/interceptor"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/logs"
 	v1 "github.com/nepu-SidneyYu/blog-grpc/proto/blog"
@@ -27,9 +28,9 @@ func (*Server) Service() {
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(interceptor.TraceServerInterceptor()),
 	)
-	v1.RegisterUserServer(server, &business.UserManager{})
+	v1.RegisterUserServer(server, business.NewUserManager())
 	logs.Info(context.Background(), "服务注册成功")
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", "0.0.0.0", 8080))
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", "192.168.184.129", config.GetConfig().Port))
 	if err != nil {
 		logs.Fatal(context.Background(), "failed to listen:")
 	}
@@ -40,7 +41,7 @@ func (*Server) Service() {
 		}
 	}()
 	logs.Info(context.Background(), "grpc server start success")
-	quit := make(chan os.Signal)
+	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	select {
