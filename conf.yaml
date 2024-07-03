@@ -9,7 +9,7 @@ mysql:
   charSet: "charset=utf8mb4&parseTime=True&loc=Local" # 其他配置, 例如时区
   database: "gvb"
   username: "root"
-  password: "example"
+  password: "123456"
 redis:
   db: 7
   host: "192.168.184.129"

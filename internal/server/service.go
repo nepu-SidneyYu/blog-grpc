@@ -19,13 +19,17 @@ import (
 type Server struct {
 }
 
-func (*Server) Servvice() {
+func NewServer() *Server {
+	return &Server{}
+}
+
+func (*Server) Service() {
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(interceptor.TraceServerInterceptor()),
 	)
 	v1.RegisterUserServer(server, &business.UserManager{})
 	logs.Info(context.Background(), "服务注册成功")
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", "0.0.0.1", 8080))
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", "0.0.0.0", 8080))
 	if err != nil {
 		logs.Fatal(context.Background(), "failed to listen:")
 	}
@@ -41,7 +45,7 @@ func (*Server) Servvice() {
 	<-quit
 	select {
 	case sig := <-quit:
-		logs.Info(context.Background(), "搜到关闭信号", zap.String("sig", sig.String()))
+		logs.Info(context.Background(), "收到关闭信号", zap.String("sig", sig.String()))
 	}
 
 	logs.Info(context.Background(), "服务关闭成功...")

@@ -45,9 +45,9 @@ func newUserLoginResponse(s ...UserLoginResponseFun) *blog.UserLoginResponse {
 
 func withUserLoginResponse(code int32, msg string, data *blog.UserInfo) UserLoginResponseFun {
 	return func(b *blog.UserLoginResponse) {
-		code = code
-		msg = msg
-		data = data
+		b.Code = code
+		b.Msg = msg
+		b.Data = data
 	}
 }
 

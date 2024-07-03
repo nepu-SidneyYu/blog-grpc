@@ -5,6 +5,7 @@ import (
 	"github.com/nepu-SidneyYu/blog-grpc/internal/loger"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/logs"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/repository"
+	"github.com/nepu-SidneyYu/blog-grpc/internal/server"
 )
 
 func main() {
@@ -19,5 +20,6 @@ func main() {
 	repository.Init()
 
 	//启动服务
-	return
+	ser := server.NewServer()
+	ser.Service()
 }

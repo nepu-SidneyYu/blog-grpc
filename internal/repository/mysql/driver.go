@@ -25,7 +25,7 @@ func Init() {
 		conf := config.GetConfig().MySql
 
 		// 拼接DSN（Data Source Name）
-		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s", conf.Username, conf.Password, conf.Host, conf.Port, conf.Database, conf.Charset)
+		dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?%s", conf.Username, conf.Password, conf.Host, conf.Port, conf.Database, conf.Charset)
 		// 使用DSN连接数据库
 		_db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Info),
