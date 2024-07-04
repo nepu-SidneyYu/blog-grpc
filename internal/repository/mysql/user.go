@@ -1,6 +1,10 @@
 package mysql
 
-import "github.com/nepu-SidneyYu/blog-grpc/internal/model"
+import (
+	"time"
+
+	"github.com/nepu-SidneyYu/blog-grpc/internal/model"
+)
 
 type User struct {
 	// 定义User结构体
@@ -20,4 +24,11 @@ func (u *User) GetUserByName(name string) (*model.UserAuth, error) {
 	}
 
 	return &userauth, nil
+}
+func (u *User) SetUser(username, password string) error {
+	tx := _db.Model(&model.UserAuth{}).Create(&model.UserAuth{Username: username, Password: password, CreatedAt: time.Now().Unix()})
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
 }

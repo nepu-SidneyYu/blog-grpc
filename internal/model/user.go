@@ -12,9 +12,6 @@ type UserAuth struct {
 	IsSuper       bool   `json:"is_super"` // 超级管理员只能后台设置
 	CreatedAt     int64  `gorm:"column:created_at;comment:创建时间" json:"created_at"`
 	UpdatedAt     int64  `gorm:"column:updated_at;comment:更新时间" json:"updated_at"`
-	//UserInfoId    int64        `json:"user_info_id"`
-	//UserInfo      *UserInfo  `json:"info"`
-	//Roles      []*Role   `json:"roles" gorm:"many2many:user_auth_role"`
 }
 
 func (u UserAuth) TableName() string {

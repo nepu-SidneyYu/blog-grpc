@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	User_UserLogin_FullMethodName = "/proto.User/UserLogin"
-	User_Register_FullMethodName  = "/proto.User/Register"
+	User_UserLogin_FullMethodName     = "/proto.User/UserLogin"
+	User_UserRegister_FullMethodName  = "/proto.User/UserRegister"
+	User_UserNameExist_FullMethodName = "/proto.User/UserNameExist"
 )
 
 // UserClient is the client API for User service.
@@ -28,7 +29,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserClient interface {
 	UserLogin(ctx context.Context, in *UserLoginRequest, opts ...grpc.CallOption) (*UserLoginResponse, error)
-	Register(ctx context.Context, in *UserRegisterRequest, opts ...grpc.CallOption) (*UserRegisterResponse, error)
+	UserRegister(ctx context.Context, in *UserRegisterRequest, opts ...grpc.CallOption) (*EmptyResponse, error)
+	UserNameExist(ctx context.Context, in *UserNameExistRequest, opts ...grpc.CallOption) (*UserNameExistResponse, error)
 }
 
 type userClient struct {
@@ -49,10 +51,20 @@ func (c *userClient) UserLogin(ctx context.Context, in *UserLoginRequest, opts .
 	return out, nil
 }
 
-func (c *userClient) Register(ctx context.Context, in *UserRegisterRequest, opts ...grpc.CallOption) (*UserRegisterResponse, error) {
+func (c *userClient) UserRegister(ctx context.Context, in *UserRegisterRequest, opts ...grpc.CallOption) (*EmptyResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UserRegisterResponse)
-	err := c.cc.Invoke(ctx, User_Register_FullMethodName, in, out, cOpts...)
+	out := new(EmptyResponse)
+	err := c.cc.Invoke(ctx, User_UserRegister_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userClient) UserNameExist(ctx context.Context, in *UserNameExistRequest, opts ...grpc.CallOption) (*UserNameExistResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UserNameExistResponse)
+	err := c.cc.Invoke(ctx, User_UserNameExist_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +76,8 @@ func (c *userClient) Register(ctx context.Context, in *UserRegisterRequest, opts
 // for forward compatibility
 type UserServer interface {
 	UserLogin(context.Context, *UserLoginRequest) (*UserLoginResponse, error)
-	Register(context.Context, *UserRegisterRequest) (*UserRegisterResponse, error)
+	UserRegister(context.Context, *UserRegisterRequest) (*EmptyResponse, error)
+	UserNameExist(context.Context, *UserNameExistRequest) (*UserNameExistResponse, error)
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -75,8 +88,11 @@ type UnimplementedUserServer struct {
 func (UnimplementedUserServer) UserLogin(context.Context, *UserLoginRequest) (*UserLoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserLogin not implemented")
 }
-func (UnimplementedUserServer) Register(context.Context, *UserRegisterRequest) (*UserRegisterResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+func (UnimplementedUserServer) UserRegister(context.Context, *UserRegisterRequest) (*EmptyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserRegister not implemented")
+}
+func (UnimplementedUserServer) UserNameExist(context.Context, *UserNameExistRequest) (*UserNameExistResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserNameExist not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
 
@@ -109,20 +125,38 @@ func _User_UserLogin_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _User_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _User_UserRegister_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UserRegisterRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServer).Register(ctx, in)
+		return srv.(UserServer).UserRegister(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: User_Register_FullMethodName,
+		FullMethod: User_UserRegister_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).Register(ctx, req.(*UserRegisterRequest))
+		return srv.(UserServer).UserRegister(ctx, req.(*UserRegisterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_UserNameExist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserNameExistRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).UserNameExist(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: User_UserNameExist_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).UserNameExist(ctx, req.(*UserNameExistRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -139,8 +173,12 @@ var User_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _User_UserLogin_Handler,
 		},
 		{
-			MethodName: "Register",
-			Handler:    _User_Register_Handler,
+			MethodName: "UserRegister",
+			Handler:    _User_UserRegister_Handler,
+		},
+		{
+			MethodName: "UserNameExist",
+			Handler:    _User_UserNameExist_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

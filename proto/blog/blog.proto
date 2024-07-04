@@ -42,10 +42,23 @@ message EmptyResponse{
     google.protobuf.Empty data = 3;
 }
 
+message UserNameExistRequest {
+    string username = 1;
+}
+message UserNameExistResponse{
+    int32 code = 1;
+    string msg = 2;
+    UserNameExistInfo data = 3;
+}
+message UserNameExistInfo{
+    bool exist = 1;
+}
+
 
 service User{
     rpc UserLogin(UserLoginRequest) returns (UserLoginResponse){}
-    rpc Register(UserRegisterRequest) returns (EmptyResponse){}
+    rpc UserRegister(UserRegisterRequest) returns (EmptyResponse){}
+    rpc UserNameExist(UserNameExistRequest) returns (UserNameExistResponse){}
     // rpc Logout(UserLogoutRequest) returns (UserLoginResponse){}
     // rpc GetInfo(UserInfoRequest) returns (UserInfoResponse){}
 }
