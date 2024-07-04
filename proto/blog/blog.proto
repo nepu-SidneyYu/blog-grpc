@@ -4,6 +4,8 @@ package proto;
 
 option go_package = "proto/blog;proto";
 
+import "google/protobuf/empty.proto";
+
 message UserLoginRequest {
     string username = 1;
     string password = 2;
@@ -34,15 +36,16 @@ message UserRegisterRequest{
     string password = 2;
 }
 
-message UserRegisterResponse{
+message EmptyResponse{
     int32 code = 1;
     string msg = 2;
+    google.protobuf.Empty data = 3;
 }
 
 
 service User{
     rpc UserLogin(UserLoginRequest) returns (UserLoginResponse){}
-    rpc Register(UserRegisterRequest) returns (UserRegisterResponse){}
+    rpc Register(UserRegisterRequest) returns (EmptyResponse){}
     // rpc Logout(UserLogoutRequest) returns (UserLoginResponse){}
     // rpc GetInfo(UserInfoRequest) returns (UserInfoResponse){}
 }

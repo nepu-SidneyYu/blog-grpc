@@ -56,6 +56,7 @@ func (u *UserManager) UserLogin(ctx context.Context, req *blog.UserLoginRequest)
 		logs.Error(ctx, "用户名或密码为空", zap.String("Error", consts.UserNameOrPasswordIsNULL.Error()))
 		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserLoginErrCode), consts.UserNameOrPasswordIsNULL.Error(), nil)), nil
 	}
+	fmt.Printf("%#v\n", req)
 	// 验证用户名和密码
 	userInfo, err := u.userRepository.GetUserByName(req.Username)
 	if err != nil {
@@ -66,6 +67,7 @@ func (u *UserManager) UserLogin(ctx context.Context, req *blog.UserLoginRequest)
 		logs.Error(ctx, "查询用户失败", zap.String("Error", err.Error()))
 		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserLoginErrCode), consts.UserLoginErr.Error(), nil)), nil
 	}
+	fmt.Printf("%#v\n", userInfo)
 	if !utils.BcryptCheck(req.Password, userInfo.Password) {
 		logs.Error(ctx, "密码错误", zap.String("Error", consts.UserLoginErr.Error()))
 		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserLoginErrCode), consts.UserLoginErr.Error(), nil)), nil
