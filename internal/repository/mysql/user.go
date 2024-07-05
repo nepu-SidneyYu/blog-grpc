@@ -26,7 +26,7 @@ func (u *User) GetUserByName(name string) (*model.UserAuth, error) {
 	return &userauth, nil
 }
 func (u *User) SetUser(username, password string) error {
-	tx := _db.Model(&model.UserAuth{}).Create(&model.UserAuth{Username: username, Password: password, CreatedAt: time.Now().Unix()})
+	tx := _db.Model(&model.UserAuth{}).Create(&model.UserAuth{Username: username, Password: password, CreatedAt: time.Now().UnixMilli()})
 	if tx.Error != nil {
 		return tx.Error
 	}

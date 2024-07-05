@@ -154,7 +154,12 @@ func (u *UserManager) UserRegister(ctx context.Context, req *blog.UserRegisterRe
 		logs.Error(ctx, "密码为空", zap.String("Error", consts.UserNameOrPasswordIsNULL.Error()))
 		return newEmptyResponse(withEmptyResponse(consts.StatusOK, consts.UserRegisterPasswordIsNULL.Error())), nil
 	}
-	err := u.userRepository.SetUser(req.Username, req.Password)
+	hashpassword, err := utils.BcryptHash(req.Password)
+	if err != nil {
+		logs.Error(ctx, "密码加密失败", zap.String("Error", err.Error()))
+		return newEmptyResponse(withEmptyResponse(int32(consts.UserRegisterErrCode), consts.UserRegisterPasswordEncryptErr.Error())), nil
+	}
+	err = u.userRepository.SetUser(req.Username, hashpassword)
 	if err != nil {
 		logs.Error(ctx, "注册用户失败", zap.String("Error", err.Error()))
 		return newEmptyResponse(withEmptyResponse(consts.StatusOK, consts.UserRegisterErr.Error())), nil
