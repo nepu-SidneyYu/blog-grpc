@@ -6,7 +6,7 @@ import (
 )
 
 func TestGetIpSourceSimpleIdle(t *testing.T) {
-	region := GetIpSourceSimpleIdle("192.168.1.2")
-
+	region := GetIpSourceSimpleIdle("81.2.69.142")
+	GeoIP("192.168.1.2")
 	fmt.Println(region)
 }

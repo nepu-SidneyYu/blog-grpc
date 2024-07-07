@@ -2,17 +2,21 @@ package utils
 
 import (
 	"context"
+	"fmt"
+	"net"
 	"strings"
 
 	"github.com/lionsoul2014/ip2region/binding/golang/xdb"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/logs"
+	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
 )
 
 var vIndex []byte
 
 func GetIpSource(ipAddress string) string {
-	var dbPath = "../region/ip2region.xdb" // IP 数据库文件
+	//var dbPath = "../region/ip2region.xdb" // IP 数据库文件
+	var dbPath = "./ip2region.xdb" // IP 数据库文件
 	// 完全基于文件查询, 每次都读取文件
 	// searcher, err := xdb.NewWithFileOnly(dbPath)
 
@@ -70,4 +74,19 @@ func GetIpSourceSimpleIdle(ipAddress string) string {
 		return ipSource[0]
 	}
 	return ipSource[2] + ipSource[3] + " " + ipSource[4]
+}
+
+func GeoIP(ip string) {
+	db, _ := geoip2.Open("./GeoLite2-City.mmdb")
+	defer db.Close()
+	// If you are using strings that may be invalid, check that ip is not nil
+	//ip := net.ParseIP("81.2.69.142")
+	r := net.ParseIP("81.2.69.142")
+	record, _ := db.City(r)
+	fmt.Printf("Portuguese (BR) city name: %v\n", record.City.Names["zh-CN"])
+	fmt.Printf("English subdivision name: %v\n", record.Subdivisions[0].Names["en"])
+	fmt.Printf("Russian country name: %v\n", record.Country.Names["en"])
+	fmt.Printf("ISO country code: %v\n", record.Country.IsoCode)
+	fmt.Printf("Time zone: %v\n", record.Location.TimeZone)
+	fmt.Printf("Coordinates: %v, %v\n", record.Location.Latitude, record.Location.Longitude)
 }
