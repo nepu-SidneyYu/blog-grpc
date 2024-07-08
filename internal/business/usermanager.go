@@ -11,6 +11,7 @@ import (
 	"github.com/nepu-SidneyYu/blog-grpc/internal/repository"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/utils"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/utils/jwt"
+	"github.com/nepu-SidneyYu/blog-grpc/internal/utils/sendcode"
 	blog "github.com/nepu-SidneyYu/blog-grpc/proto/blog"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -165,4 +166,28 @@ func (u *UserManager) UserRegister(ctx context.Context, req *blog.UserRegisterRe
 		return newEmptyResponse(withEmptyResponse(consts.StatusOK, consts.UserRegisterErr.Error())), nil
 	}
 	return newEmptyResponse(), nil
+}
+func (u *UserManager) BindEmail(ctx context.Context, req *blog.BindEmailRequest) (*blog.EmptyResponse, error) {
+	if req.Email == "" {
+		logs.Error(ctx, "邮箱为空", zap.String("Error", consts.EmailIsNULL.Error()))
+		return newEmptyResponse(withEmptyResponse(int32(consts.BindEmailErrCode), consts.EmailIsNULL.Error())), nil
+	}
+	//TODO：验证验证码是否正确
+
+	//TODO：绑定邮箱
+
+}
+
+func (u *UserManager) SendEmailCode(ctx context.Context, req *blog.SendCodeRequest) (*blog.EmptyResponse, error) {
+	if req.Email == "" {
+		logs.Error(ctx, "邮箱为空", zap.String("Error", "邮箱为空"))
+		return newEmptyResponse(withEmptyResponse(int32(consts.SendEmailCodeErrCode), consts.EmailIsNULL.Error())), nil
+	}
+	code, err := sendcode.SendVerificationCode(ctx, req.Email)
+	if err != nil {
+		logs.Error(ctx, "发送验证码失败", zap.String("Error", err.Error()))
+		return newEmptyResponse(withEmptyResponse(int32(consts.SendEmailCodeErrCode), consts.SendEmailCodeErr.Error())), nil
+	}
+	//TODO:设置验证码的过期时间
+
 }
