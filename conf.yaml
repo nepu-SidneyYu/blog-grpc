@@ -10,6 +10,13 @@ mysql:
   database: "gvb"
   username: "root"
   password: "123456"
+email:
+  host: "smtp.qq.com" # 服务器地址, 例如 smtp.qq.com 前往要发邮件的邮箱查看其 smtp 协议
+  port: 587 # 端口, 例如 465 或 587
+  from: "3247828719@qq.com" # 发件人邮箱
+  secret: "hwneujtrczqtchde" # 密钥, 不是邮箱登录密码, 是开启 smtp 服务后获取的一串验证码
+  nickname: "yyx" # 发件人昵称, 通常为自己的邮箱名
+  expire: 10 # 邮件过期时间, 以分钟为单位
 redis:
   db: 7
   host: "192.168.184.129"

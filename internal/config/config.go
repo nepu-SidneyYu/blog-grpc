@@ -16,8 +16,9 @@ type Config struct {
 	// MySql字段，指向MySqlConfig结构体
 	MySql MySqlConfig `yaml:"mysql"`
 	//jwt字段
-	JWt   JWTConfig   `yaml:"jwt"`
-	Redis RedisConfig `yaml:"redis"`
+	JWt   JWTConfig           `yaml:"jwt"`
+	Redis RedisConfig         `yaml:"redis"`
+	Email SendEmailCodeConfig `yaml:"email"`
 }
 
 var (
@@ -28,6 +29,15 @@ type JWTConfig struct {
 	Secret string `yaml:"secret"`
 	Expire int32  `yaml:"expire"` // hour
 	Issuer string `yaml:"issuer"`
+}
+
+type SendEmailCodeConfig struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	From     string `yaml:"from"`
+	Secret   string `yaml:"secret"`
+	NickName string `yaml:"nickname"`
+	Expire   int32  `yaml:"expire"` // minute
 }
 
 type MySqlConfig struct {
