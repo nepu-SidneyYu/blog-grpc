@@ -1,6 +1,6 @@
 module github.com/nepu-SidneyYu/blog-grpc
 
-go 1.20
+go 1.21.1
 
 require (
 	go.uber.org/zap v1.27.0
@@ -17,6 +17,7 @@ require (
 	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20240510055607-89e20ab7b6c6 // indirect
 	github.com/oschwald/geoip2-golang v1.11.0 // indirect
 	github.com/oschwald/maxminddb-golang v1.13.0 // indirect
+	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/redis/go-redis/v9 v9.5.3 // indirect
 	gorm.io/driver/mysql v1.5.7 // indirect
@@ -25,6 +26,7 @@ require (
 require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/crypto v0.24.0

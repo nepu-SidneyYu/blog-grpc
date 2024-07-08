@@ -19,4 +19,4 @@ init:
 
 .PHONY: proto
 proto:
-	protoc --proto_path=./proto --go_out=paths=source_relative:./proto --go-grpc_out=paths=source_relative:./proto $(API_PROTO_FILES)
+	protoc --proto_path=./proto --proto_path=./third_party --go_out=paths=source_relative:./proto --go-grpc_out=paths=source_relative:./proto $(API_PROTO_FILES)

@@ -54,13 +54,21 @@ message UserNameExistInfo{
     bool exist = 1;
 }
 
+message BindEmailRequest{
+    string email = 1;
+    string code = 2;
+}
+
+message SendCodeRequest{
+    string email = 1;
+}
 
 service User{
     rpc UserLogin(UserLoginRequest) returns (UserLoginResponse){}
     rpc UserRegister(UserRegisterRequest) returns (EmptyResponse){}
     rpc UserNameExist(UserNameExistRequest) returns (UserNameExistResponse){}
-    // rpc Logout(UserLogoutRequest) returns (UserLoginResponse){}
-    // rpc GetInfo(UserInfoRequest) returns (UserInfoResponse){}
+    rpc BindEmail(BindEmailRequest) returns (EmptyResponse){}
+    rpc SendEmailCode(SendCodeRequest) returns (EmptyResponse){}
 }
 
 
