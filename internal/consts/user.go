@@ -16,9 +16,11 @@ var (
 	UserRegisterErr                userErr = errors.New("注册失败")
 	UserRegisterPasswordIsNULL     userErr = errors.New("注册密码为空")
 	UserRegisterPasswordEncryptErr userErr = errors.New("密码加密失败")
-	SendEmailCodeErr               userErr = errors.New("发送邮件失败")
+	SendEmailCodeErr               userErr = errors.New("发送邮件验证码失败")
 	EmailIsNULL                    userErr = errors.New("邮箱为空")
 	EmailCodeErr                   userErr = errors.New("邮箱验证码错误")
+	BindEmailErr                   userErr = errors.New("绑定邮箱失败")
+	SetCodeErr                     userErr = errors.New("设置验证码失败")
 )
 
 type userErrCode int32
@@ -29,4 +31,5 @@ const (
 	UserRegisterErrCode
 	SendEmailCodeErrCode
 	BindEmailErrCode
+	SetCodeErrCode
 )

@@ -10,6 +10,9 @@ import (
 var (
 	_blogUserRepository     User
 	_blogUserRepositoryOnce sync.Once // 保证单例
+
+	_blogCodeCacheRepository     CodeCache
+	_blogCodeCacheRepositoryOnce sync.Once // 保证单例
 )
 
 func Init() {
@@ -22,4 +25,12 @@ func GetBlogUserRepository() User {
 		_blogUserRepository = mysql.NewUser()
 	})
 	return _blogUserRepository
+}
+
+func GetBlogCodeCacheRepository() CodeCache {
+
+	_blogCodeCacheRepositoryOnce.Do(func() {
+		_blogCodeCacheRepository = redis.NewCodeCache()
+	})
+	return _blogCodeCacheRepository
 }

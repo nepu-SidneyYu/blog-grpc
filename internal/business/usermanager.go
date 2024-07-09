@@ -19,12 +19,16 @@ import (
 
 type UserManager struct {
 	blog.UnimplementedUserServer
-	userRepository repository.User
+	userRepository      repository.User
+	codeCacheRepository repository.CodeCache
+	conf                config.SendEmailCodeConfig
 }
 
 func NewUserManager() *UserManager {
 	return &UserManager{
-		userRepository: repository.GetBlogUserRepository(),
+		userRepository:      repository.GetBlogUserRepository(),
+		codeCacheRepository: repository.GetBlogCodeCacheRepository(),
+		conf:                config.GetConfig().Email,
 	}
 }
 
@@ -173,7 +177,14 @@ func (u *UserManager) BindEmail(ctx context.Context, req *blog.BindEmailRequest)
 		return newEmptyResponse(withEmptyResponse(int32(consts.BindEmailErrCode), consts.EmailIsNULL.Error())), nil
 	}
 	//TODO：验证验证码是否正确
-
+	code, err := u.codeCacheRepository.GetCode(req.Email)
+	if err != nil {
+		logs.Error(ctx, "获取验证码失败", zap.String("Error", err.Error()))
+		return newEmptyResponse(withEmptyResponse(int32(consts.BindEmailErrCode), "获取验证码失败")), nil
+	}
+	if code != req.Code {
+		logs.Error(ctx, "验证码错误", zap.String("Error", "验证码错误"))
+	}
 	//TODO：绑定邮箱
 
 }
@@ -188,6 +199,12 @@ func (u *UserManager) SendEmailCode(ctx context.Context, req *blog.SendCodeReque
 		logs.Error(ctx, "发送验证码失败", zap.String("Error", err.Error()))
 		return newEmptyResponse(withEmptyResponse(int32(consts.SendEmailCodeErrCode), consts.SendEmailCodeErr.Error())), nil
 	}
-	//TODO:设置验证码的过期时间
 
+	//TODO:设置验证码的过期时间
+	err = u.codeCacheRepository.SetCode(req.Email, code, int64(u.conf.Expire))
+	if err != nil {
+		logs.Error(ctx, "存储验证码失败", zap.String("Error", err.Error()))
+		return newEmptyResponse(withEmptyResponse(int32(consts.SetCodeErrCode), consts.SetCodeErr.Error())), nil
+	}
+	return newEmptyResponse(), nil
 }
