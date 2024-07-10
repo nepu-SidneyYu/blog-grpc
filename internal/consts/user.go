@@ -21,6 +21,9 @@ var (
 	EmailCodeErr                   userErr = errors.New("邮箱验证码错误")
 	BindEmailErr                   userErr = errors.New("绑定邮箱失败")
 	SetCodeErr                     userErr = errors.New("设置验证码失败")
+	SendPhoneCodeErr               userErr = errors.New("发送手机验证码失败")
+	PhoneIsNULL                    userErr = errors.New("手机号为空")
+	//StorgegePhoneCodeErr           userErr = errors.New("存储手机验证码失败")
 )
 
 type userErrCode int32
@@ -32,4 +35,5 @@ const (
 	SendEmailCodeErrCode
 	BindEmailErrCode
 	SetCodeErrCode
+	SendPhoneCodeErrCode
 )

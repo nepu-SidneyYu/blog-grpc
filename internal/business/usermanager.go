@@ -154,20 +154,39 @@ func (u *UserManager) UserNameExist(ctx context.Context, req *blog.UserNameExist
 	return newUserNameExistResponse(withUserNameExistResponse(consts.StatusOK, consts.StatusSuccess, &blog.UserNameExistInfo{Exist: false})), nil
 }
 
+func (u *UserManager) SendPhoneCode(ctx context.Context, req *blog.SendPhoneCodeRequest) (*blog.EmptyResponse, error) {
+	if req.Phone == "" {
+		logs.Error(ctx, "手机号为空", zap.String("Error", consts.PhoneIsNULL.Error()))
+		return newEmptyResponse(withEmptyResponse(int32(consts.SendPhoneCodeErrCode), consts.PhoneIsNULL.Error())), nil
+	}
+	//发送短信验证码
+	code, err := sendcode.SendPhoneCode(req.Phone)
+	if err != nil {
+		logs.Error(ctx, "发送短信验证码失败", zap.String("Error", err.Error()))
+		return newEmptyResponse(withEmptyResponse(int32(consts.SendPhoneCodeErrCode), consts.SendPhoneCodeErr.Error())), nil
+	}
+	err = u.codeCacheRepository.SetCode(req.Phone, code, int64(config.GetConfig().Phone.Expire))
+	if err != nil {
+		logs.Error(ctx, "保存验证码失败", zap.String("Error", err.Error()))
+		return newEmptyResponse(withEmptyResponse(int32(consts.SendPhoneCodeErrCode), consts.SetCodeErr.Error())), nil
+	}
+	return newEmptyResponse(), nil
+}
+
 func (u *UserManager) UserRegister(ctx context.Context, req *blog.UserRegisterRequest) (*blog.EmptyResponse, error) {
 	if req.Password == "" {
 		logs.Error(ctx, "密码为空", zap.String("Error", consts.UserNameOrPasswordIsNULL.Error()))
-		return newEmptyResponse(withEmptyResponse(consts.StatusOK, consts.UserRegisterPasswordIsNULL.Error())), nil
+		return newEmptyResponse(withEmptyResponse(int32(consts.UserRegisterErrCode), consts.UserRegisterPasswordIsNULL.Error())), nil
 	}
 	hashpassword, err := utils.BcryptHash(req.Password)
 	if err != nil {
 		logs.Error(ctx, "密码加密失败", zap.String("Error", err.Error()))
 		return newEmptyResponse(withEmptyResponse(int32(consts.UserRegisterErrCode), consts.UserRegisterPasswordEncryptErr.Error())), nil
 	}
-	err = u.userRepository.SetUser(req.Username, hashpassword)
+	err = u.userRepository.SetUser(req.Phone, hashpassword)
 	if err != nil {
 		logs.Error(ctx, "注册用户失败", zap.String("Error", err.Error()))
-		return newEmptyResponse(withEmptyResponse(consts.StatusOK, consts.UserRegisterErr.Error())), nil
+		return newEmptyResponse(withEmptyResponse(int32(consts.UserRegisterErrCode), consts.UserRegisterErr.Error())), nil
 	}
 	return newEmptyResponse(), nil
 }
@@ -184,9 +203,10 @@ func (u *UserManager) BindEmail(ctx context.Context, req *blog.BindEmailRequest)
 	}
 	if code != req.Code {
 		logs.Error(ctx, "验证码错误", zap.String("Error", "验证码错误"))
+		return newEmptyResponse(withEmptyResponse(int32(consts.BindEmailErrCode), "验证码错误")), nil
 	}
 	//TODO：绑定邮箱
-
+	return newEmptyResponse(), nil
 }
 
 func (u *UserManager) SendEmailCode(ctx context.Context, req *blog.SendCodeRequest) (*blog.EmptyResponse, error) {

@@ -32,7 +32,7 @@ message UserInfo{
 
 
 message UserRegisterRequest{
-    string username = 1;
+    string phone = 1;
     string password = 2;
 }
 
@@ -63,12 +63,17 @@ message SendCodeRequest{
     string email = 1;
 }
 
+message SendPhoneCodeRequest{
+    string phone = 1;
+}
+
 service User{
     rpc UserLogin(UserLoginRequest) returns (UserLoginResponse){}
     rpc UserRegister(UserRegisterRequest) returns (EmptyResponse){}
     rpc UserNameExist(UserNameExistRequest) returns (UserNameExistResponse){}
     rpc BindEmail(BindEmailRequest) returns (EmptyResponse){}
     rpc SendEmailCode(SendCodeRequest) returns (EmptyResponse){}
+    rpc SendPhoneCode(SendPhoneCodeRequest) returns (EmptyResponse){}
 }
 
 

@@ -19,12 +19,22 @@ type Config struct {
 	JWt   JWTConfig           `yaml:"jwt"`
 	Redis RedisConfig         `yaml:"redis"`
 	Email SendEmailCodeConfig `yaml:"email"`
+	Phone SendPhoneCodeConfig `yaml:"phone"`
 }
 
 var (
 	_config Config
 )
 
+type SendPhoneCodeConfig struct {
+	AccessKeyId     string `yaml:"accessKeyId"`
+	AccessKeySecret string `yaml:"accessKeySecret"`
+	TemplateCode    string `yaml:"templateCode"`
+	Expire          int32  `yaml:"expire"`
+	CodeNum         int    `yaml:"codeNum"`
+	SignName        string `yaml:"signName"`
+	Scheme          string `yaml:"scheme"`
+}
 type JWTConfig struct {
 	Secret string `yaml:"secret"`
 	Expire int32  `yaml:"expire"` // hour

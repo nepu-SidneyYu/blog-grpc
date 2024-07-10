@@ -23,7 +23,8 @@ const (
 	User_UserRegister_FullMethodName  = "/proto.User/UserRegister"
 	User_UserNameExist_FullMethodName = "/proto.User/UserNameExist"
 	User_BindEmail_FullMethodName     = "/proto.User/BindEmail"
-	User_SendCode_FullMethodName      = "/proto.User/SendCode"
+	User_SendEmailCode_FullMethodName = "/proto.User/SendEmailCode"
+	User_SendPhoneCode_FullMethodName = "/proto.User/SendPhoneCode"
 )
 
 // UserClient is the client API for User service.
@@ -34,7 +35,8 @@ type UserClient interface {
 	UserRegister(ctx context.Context, in *UserRegisterRequest, opts ...grpc.CallOption) (*EmptyResponse, error)
 	UserNameExist(ctx context.Context, in *UserNameExistRequest, opts ...grpc.CallOption) (*UserNameExistResponse, error)
 	BindEmail(ctx context.Context, in *BindEmailRequest, opts ...grpc.CallOption) (*EmptyResponse, error)
-	SendCode(ctx context.Context, in *SendCodeRequest, opts ...grpc.CallOption) (*EmptyResponse, error)
+	SendEmailCode(ctx context.Context, in *SendCodeRequest, opts ...grpc.CallOption) (*EmptyResponse, error)
+	SendPhoneCode(ctx context.Context, in *SendPhoneCodeRequest, opts ...grpc.CallOption) (*EmptyResponse, error)
 }
 
 type userClient struct {
@@ -85,10 +87,20 @@ func (c *userClient) BindEmail(ctx context.Context, in *BindEmailRequest, opts .
 	return out, nil
 }
 
-func (c *userClient) SendCode(ctx context.Context, in *SendCodeRequest, opts ...grpc.CallOption) (*EmptyResponse, error) {
+func (c *userClient) SendEmailCode(ctx context.Context, in *SendCodeRequest, opts ...grpc.CallOption) (*EmptyResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(EmptyResponse)
-	err := c.cc.Invoke(ctx, User_SendCode_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, User_SendEmailCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userClient) SendPhoneCode(ctx context.Context, in *SendPhoneCodeRequest, opts ...grpc.CallOption) (*EmptyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EmptyResponse)
+	err := c.cc.Invoke(ctx, User_SendPhoneCode_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +115,8 @@ type UserServer interface {
 	UserRegister(context.Context, *UserRegisterRequest) (*EmptyResponse, error)
 	UserNameExist(context.Context, *UserNameExistRequest) (*UserNameExistResponse, error)
 	BindEmail(context.Context, *BindEmailRequest) (*EmptyResponse, error)
-	SendCode(context.Context, *SendCodeRequest) (*EmptyResponse, error)
+	SendEmailCode(context.Context, *SendCodeRequest) (*EmptyResponse, error)
+	SendPhoneCode(context.Context, *SendPhoneCodeRequest) (*EmptyResponse, error)
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -123,8 +136,11 @@ func (UnimplementedUserServer) UserNameExist(context.Context, *UserNameExistRequ
 func (UnimplementedUserServer) BindEmail(context.Context, *BindEmailRequest) (*EmptyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BindEmail not implemented")
 }
-func (UnimplementedUserServer) SendCode(context.Context, *SendCodeRequest) (*EmptyResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendCode not implemented")
+func (UnimplementedUserServer) SendEmailCode(context.Context, *SendCodeRequest) (*EmptyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendEmailCode not implemented")
+}
+func (UnimplementedUserServer) SendPhoneCode(context.Context, *SendPhoneCodeRequest) (*EmptyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendPhoneCode not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
 
@@ -211,20 +227,38 @@ func _User_BindEmail_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _User_SendCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _User_SendEmailCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SendCodeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServer).SendCode(ctx, in)
+		return srv.(UserServer).SendEmailCode(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: User_SendCode_FullMethodName,
+		FullMethod: User_SendEmailCode_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).SendCode(ctx, req.(*SendCodeRequest))
+		return srv.(UserServer).SendEmailCode(ctx, req.(*SendCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_SendPhoneCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendPhoneCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).SendPhoneCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: User_SendPhoneCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).SendPhoneCode(ctx, req.(*SendPhoneCodeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -253,8 +287,12 @@ var User_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _User_BindEmail_Handler,
 		},
 		{
-			MethodName: "SendCode",
-			Handler:    _User_SendCode_Handler,
+			MethodName: "SendEmailCode",
+			Handler:    _User_SendEmailCode_Handler,
+		},
+		{
+			MethodName: "SendPhoneCode",
+			Handler:    _User_SendPhoneCode_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
