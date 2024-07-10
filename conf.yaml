@@ -17,14 +17,6 @@ email:
   secret: "hwneujtrczqtchde" # 密钥, 不是邮箱登录密码, 是开启 smtp 服务后获取的一串验证码
   nickname: "yyx" # 发件人昵称, 通常为自己的邮箱名
   expire: 10 # 邮件过期时间, 以分钟为单位
-phone:
-  accessKeyId: "LTAI5tHEwtgALYziYigYoVq1"
-  accessKeySecret: "5UY0gZ0K9nhf0VWFVuVxZvOOdUPg42"
-  templateCode: "SMS_301490363" # 短信模板ID
-  expire: 10 # 验证码过期时间, 以分钟为单位
-  codeNum: 6  # 验证码长度
-  signName: "验证码短信" # 短信签名
-  scheme: "http" # 短信发送协议, http 或 https
 redis:
   db: 7
   host: "192.168.184.129"
