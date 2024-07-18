@@ -1,17 +1,17 @@
 package model
 
 type UserAuth struct {
-	ID            int    `gorm:"primary_key;auto_increment" json:"id"`
-	Username      string `gorm:"unique;type:varchar(50)" json:"userName"`
-	Password      string `gorm:"type:varchar(100)" json:"-"`
-	LoginType     int    `gorm:"column:login_type;type:tinyint(1);comment:登录类型" json:"login_ype"`
-	IpAddress     string `gorm:"type:varchar(20);comment:登录IP地址" json:"ip_address"`
-	IpSource      string `gorm:"type:varchar(50);comment:IP来源" json:"ip_source"`
-	LastLoginTime int64  `gorm:"last_login_time;type:datetime" json:"last_login_time"`
-	IsDisable     bool   `json:"is_disable"`
-	IsSuper       bool   `json:"is_super"` // 超级管理员只能后台设置
-	CreatedAt     int64  `gorm:"column:created_at;comment:创建时间" json:"created_at"`
-	UpdatedAt     int64  `gorm:"column:updated_at;comment:更新时间" json:"updated_at"`
+	ID            int    `gorm:"primary_key;auto_increment;column:id" json:"id"`
+	Username      string `gorm:"uniqueIndex;type:varchar(50);column:username;not null" json:"userName"`
+	Password      string `gorm:"uniqueIndex;type:varchar(100);column:password;not null" json:"-"`
+	LoginType     int    `gorm:"uniqueIndex;column:login_type;type:tinyint(1);comment:登录类型" json:"login_ype"`
+	IpAddress     string `gorm:"type:varchar(20);comment:登录IP地址;column:ip_address" json:"ip_address"`
+	IpSource      string `gorm:"type:varchar(50);comment:IP来源;column:ip_source" json:"ip_source"`
+	LastLoginTime int64  `gorm:"last_login_time;type:bigint(20);comment:上次登录时间" json:"last_login_time"`
+	IsDisable     bool   `json:"is_disable" gorm:"column:is_disable;comment:是否禁用;type:tinyint(1);default:0"`
+	IsSuper       bool   `json:"is_super" gorm:"column:is_super;comment:超级管理员;type:tinyint(1);default:0"` // 超级管理员只能后台设置
+	CreatedAt     int64  `gorm:"column:created_at;comment:创建时间;type:bigint(20)" json:"created_at"`
+	UpdatedAt     int64  `gorm:"column:updated_at;comment:更新时间;type:bigint(20)" json:"updated_at"`
 }
 
 func (u UserAuth) TableName() string {

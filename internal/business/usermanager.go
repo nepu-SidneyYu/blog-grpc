@@ -165,7 +165,7 @@ func (u *UserManager) SendPhoneCode(ctx context.Context, req *blog.SendPhoneCode
 		logs.Error(ctx, "发送短信验证码失败", zap.String("Error", err.Error()))
 		return newEmptyResponse(withEmptyResponse(int32(consts.SendPhoneCodeErrCode), consts.SendPhoneCodeErr.Error())), nil
 	}
-	err = u.codeCacheRepository.SetCode(req.Phone, code, int64(config.GetConfig().Phone.Expire))
+	err = u.codeCacheRepository.SetPhoneCode(consts.PhoneCodeFeild, req.Phone, code, int64(config.GetConfig().Phone.Expire))
 	if err != nil {
 		logs.Error(ctx, "保存验证码失败", zap.String("Error", err.Error()))
 		return newEmptyResponse(withEmptyResponse(int32(consts.SendPhoneCodeErrCode), consts.SetCodeErr.Error())), nil
@@ -174,6 +174,10 @@ func (u *UserManager) SendPhoneCode(ctx context.Context, req *blog.SendPhoneCode
 }
 
 func (u *UserManager) UserRegister(ctx context.Context, req *blog.UserRegisterRequest) (*blog.EmptyResponse, error) {
+	if req.Phone == "" {
+		logs.Error(ctx, "手机号为空", zap.String("Error", consts.PhoneIsNULL.Error()))
+		return newEmptyResponse(withEmptyResponse(int32(consts.UserRegisterErrCode), consts.PhoneIsNULL.Error())), nil
+	}
 	if req.Password == "" {
 		logs.Error(ctx, "密码为空", zap.String("Error", consts.UserNameOrPasswordIsNULL.Error()))
 		return newEmptyResponse(withEmptyResponse(int32(consts.UserRegisterErrCode), consts.UserRegisterPasswordIsNULL.Error())), nil
@@ -196,7 +200,7 @@ func (u *UserManager) BindEmail(ctx context.Context, req *blog.BindEmailRequest)
 		return newEmptyResponse(withEmptyResponse(int32(consts.BindEmailErrCode), consts.EmailIsNULL.Error())), nil
 	}
 	//TODO：验证验证码是否正确
-	code, err := u.codeCacheRepository.GetCode(req.Email)
+	code, err := u.codeCacheRepository.GetEmailCode(consts.EmailCodeFeild, req.Email)
 	if err != nil {
 		logs.Error(ctx, "获取验证码失败", zap.String("Error", err.Error()))
 		return newEmptyResponse(withEmptyResponse(int32(consts.BindEmailErrCode), "获取验证码失败")), nil
@@ -221,7 +225,7 @@ func (u *UserManager) SendEmailCode(ctx context.Context, req *blog.SendCodeReque
 	}
 
 	//TODO:设置验证码的过期时间
-	err = u.codeCacheRepository.SetCode(req.Email, code, int64(u.conf.Expire))
+	err = u.codeCacheRepository.SetEmailCode(consts.EmailCodeFeild, req.Email, code, int64(u.conf.Expire))
 	if err != nil {
 		logs.Error(ctx, "存储验证码失败", zap.String("Error", err.Error()))
 		return newEmptyResponse(withEmptyResponse(int32(consts.SetCodeErrCode), consts.SetCodeErr.Error())), nil

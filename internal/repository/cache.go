@@ -1,6 +1,8 @@
 package repository
 
 type CodeCache interface {
-	SetCode(codekey string, code string, expire int64) error
-	GetCode(codekey string) (string, error)
+	SetPhoneCode(feild string, codekey string, code string, expire int64) error
+	GetPhoneCode(feild string, codekey string) (string, error)
+	SetEmailCode(feild string, codekey string, code string, expire int64) error
+	GetEmailCode(feild string, codekey string) (string, error)
 }

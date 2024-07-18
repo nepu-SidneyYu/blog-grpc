@@ -37,3 +37,8 @@ const (
 	SetCodeErrCode
 	SendPhoneCodeErrCode
 )
+
+const (
+	EmailCodeFeild = "email_code"
+	PhoneCodeFeild = "phone_code"
+)
