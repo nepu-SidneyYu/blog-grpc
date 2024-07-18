@@ -34,6 +34,7 @@ type SendPhoneCodeConfig struct {
 	CodeNum         int    `yaml:"codeNum"`
 	SignName        string `yaml:"signName"`
 	Scheme          string `yaml:"scheme"`
+	Region          string `yaml:"region"`
 }
 type JWTConfig struct {
 	Secret string `yaml:"secret"`
