@@ -23,6 +23,7 @@ var (
 	SetCodeErr                     userErr = errors.New("设置验证码失败")
 	SendPhoneCodeErr               userErr = errors.New("发送手机验证码失败")
 	PhoneIsNULL                    userErr = errors.New("手机号为空")
+	SerUserNameErr                 userErr = errors.New("设置用户名失败")
 	//StorgegePhoneCodeErr           userErr = errors.New("存储手机验证码失败")
 )
 
@@ -36,6 +37,7 @@ const (
 	BindEmailErrCode
 	SetCodeErrCode
 	SendPhoneCodeErrCode
+	SetUserNameErrCode
 )
 
 const (

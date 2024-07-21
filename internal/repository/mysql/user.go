@@ -25,8 +25,18 @@ func (u *User) GetUserByName(name string) (*model.UserAuth, error) {
 
 	return &userauth, nil
 }
-func (u *User) SetUser(username, password string) error {
-	tx := _db.Model(&model.UserAuth{}).Create(&model.UserAuth{Username: username, Password: password, CreatedAt: time.Now().UnixMilli()})
+func (u *User) SetUser(phone, password string) error {
+	tx := _db.Model(&model.UserAuth{}).Create(&model.UserAuth{Phone: phone, Password: password, CreatedAt: time.Now().UnixMilli()})
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
+}
+
+func (u *User) SetUserName(phone, name string) error {
+	tx := _db.Model(&model.UserAuth{}).Where("phone = ?", phone).Updates(map[string]interface{}{
+		"username":   name,
+		"updated_at": time.Now().UnixMilli()})
 	if tx.Error != nil {
 		return tx.Error
 	}

@@ -11,6 +11,26 @@ message UserLoginRequest {
     string password = 2;
 }
 
+message UserUsePhoneLoginRequest {
+    string phone = 1;
+    string password = 2;
+}
+message UserUsePhoneLoginResponse{
+    int32 code = 1;
+    string msg = 2;
+    UserInfo data = 3;
+}
+
+message UserUseEmailLoginRequest {
+    string email = 1;
+    string password = 2;
+}
+message UserUseEmailLoginResponse{
+    int32 code = 1;
+    string msg = 2;
+    UserInfo data = 3;
+}
+
 message UserLoginResponse{
     int32 code = 1;
     string msg = 2;
@@ -29,7 +49,6 @@ message UserInfo{
     repeated string comments_like_set = 10;
     string token = 11;
 } 
-
 
 message UserRegisterRequest{
     string phone = 1;
@@ -66,9 +85,19 @@ message SendCodeRequest{
 message SendPhoneCodeRequest{
     string phone = 1;
 }
+message SetUserNameRequest{
+    string username = 1;
+    string phone=2;
+}
+
+//存储user到布隆过滤器
+
 
 service User{
     rpc UserLogin(UserLoginRequest) returns (UserLoginResponse){}
+    rpc UserUsePhoneLogin(UserUsePhoneLoginRequest) returns (UserLoginResponse){}
+    rpc UserUseEmailLogin(UserUseEmailLoginRequest) returns (UserLoginResponse){}
+    rpc SetUserName(SetUserNameRequest) returns (EmptyResponse){}
     rpc UserRegister(UserRegisterRequest) returns (EmptyResponse){}
     rpc UserNameExist(UserNameExistRequest) returns (UserNameExistResponse){}
     rpc BindEmail(BindEmailRequest) returns (EmptyResponse){}

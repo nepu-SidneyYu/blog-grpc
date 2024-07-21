@@ -2,9 +2,10 @@ package model
 
 type UserAuth struct {
 	ID            int    `gorm:"primary_key;auto_increment;column:id" json:"id"`
+	Phone         string `gorm:"uniqueIndex;type:varchar(20);column:phone;not null" json:"phone"`
 	Username      string `gorm:"uniqueIndex;type:varchar(50);column:username;not null" json:"userName"`
-	Password      string `gorm:"uniqueIndex;type:varchar(100);column:password;not null" json:"-"`
-	LoginType     int    `gorm:"uniqueIndex;column:login_type;type:tinyint(1);comment:登录类型" json:"login_ype"`
+	Password      string `gorm:"type:varchar(100);column:password;not null" json:"-"`
+	LoginType     int    `gorm:"column:login_type;type:tinyint(1);comment:登录类型" json:"login_ype"`
 	IpAddress     string `gorm:"type:varchar(20);comment:登录IP地址;column:ip_address" json:"ip_address"`
 	IpSource      string `gorm:"type:varchar(50);comment:IP来源;column:ip_source" json:"ip_source"`
 	LastLoginTime int64  `gorm:"last_login_time;type:bigint(20);comment:上次登录时间" json:"last_login_time"`

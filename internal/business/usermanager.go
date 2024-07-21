@@ -102,8 +102,8 @@ func (u *UserManager) UserLogin(ctx context.Context, req *blog.UserLoginRequest)
 		logs.Error(ctx, "获取ip失败", zap.String("Error", "从ctx中获取ip失败"))
 		ip = "127.0.0.1"
 	}
-	ipSourse := utils.GetIpSource(ip)
-	fmt.Println("ipSourse:", ipSourse)
+	//ipSourse := utils.GetIpSource(ip)
+
 	// 验证用户名和密码
 	userInfo, err := u.userRepository.GetUserByName(req.Username)
 	if err != nil {
@@ -196,6 +196,8 @@ func (u *UserManager) UserRegister(ctx context.Context, req *blog.UserRegisterRe
 	}
 	return newEmptyResponse(), nil
 }
+
+// 绑定邮箱
 func (u *UserManager) BindEmail(ctx context.Context, req *blog.BindEmailRequest) (*blog.EmptyResponse, error) {
 	if req.Email == "" {
 		logs.Error(ctx, "邮箱为空", zap.String("Error", consts.EmailIsNULL.Error()))
@@ -215,6 +217,7 @@ func (u *UserManager) BindEmail(ctx context.Context, req *blog.BindEmailRequest)
 	return newEmptyResponse(), nil
 }
 
+// 发送邮箱验证码
 func (u *UserManager) SendEmailCode(ctx context.Context, req *blog.SendCodeRequest) (*blog.EmptyResponse, error) {
 	if req.Email == "" {
 		logs.Error(ctx, "邮箱为空", zap.String("Error", "邮箱为空"))
@@ -225,12 +228,24 @@ func (u *UserManager) SendEmailCode(ctx context.Context, req *blog.SendCodeReque
 		logs.Error(ctx, "发送验证码失败", zap.String("Error", err.Error()))
 		return newEmptyResponse(withEmptyResponse(int32(consts.SendEmailCodeErrCode), consts.SendEmailCodeErr.Error())), nil
 	}
-
 	//TODO:设置验证码的过期时间
 	err = u.codeCacheRepository.SetEmailCode(consts.EmailCodeFeild, req.Email, code, int64(u.conf.Expire))
 	if err != nil {
 		logs.Error(ctx, "存储验证码失败", zap.String("Error", err.Error()))
 		return newEmptyResponse(withEmptyResponse(int32(consts.SetCodeErrCode), consts.SetCodeErr.Error())), nil
+	}
+	return newEmptyResponse(), nil
+}
+
+func (u *UserManager) SetUserName(ctx context.Context, req *blog.SetUserNameRequest) (*blog.EmptyResponse, error) {
+	if req.Username == "" {
+		logs.Error(ctx, "用户名为空", zap.String("Error", consts.UserNameIsNull.Error()))
+		return newEmptyResponse(withEmptyResponse(int32(consts.SetUserNameErrCode), consts.UserNameIsNull.Error())), nil
+	}
+	err := u.userRepository.SetUserName(req.Phone, req.Username)
+	if err != nil {
+		logs.Error(ctx, "设置用户名失败", zap.String("Error", err.Error()))
+		return newEmptyResponse(withEmptyResponse(int32(consts.SetUserNameErrCode), consts.SerUserNameErr.Error())), nil
 	}
 	return newEmptyResponse(), nil
 }
