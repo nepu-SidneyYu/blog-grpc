@@ -167,12 +167,7 @@ func (u *UserManager) SendPhoneCode(ctx context.Context, req *blog.SendPhoneCode
 		logs.Error(ctx, "发送短信验证码失败", zap.String("Error", err.Error()))
 		return newEmptyResponse(withEmptyResponse(int32(consts.SendPhoneCodeErrCode), consts.SendPhoneCodeErr.Error())), nil
 	}
-<<<<<<< HEAD
 	err = u.codeCacheRepository.SetPhoneCode(consts.PhoneCodeFeild, req.Phone, code, int64(config.GetConfig().Phone.Expire))
-=======
-	logs.Info(ctx, "验证码已发送", zap.String("Phone", req.Phone))
-	err = u.codeCacheRepository.SetCode(req.Phone, code, int64(config.GetConfig().Phone.Expire))
->>>>>>> 959c15b866dd0432f3536f1ad56a8872299b6e00
 	if err != nil {
 		logs.Error(ctx, "保存验证码失败", zap.String("Error", err.Error()))
 		return newEmptyResponse(withEmptyResponse(int32(consts.SendPhoneCodeErrCode), consts.SetCodeErr.Error())), nil
