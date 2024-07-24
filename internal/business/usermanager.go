@@ -18,16 +18,18 @@ import (
 
 type UserManager struct {
 	blog.UnimplementedUserServer
-	userRepository      repository.User
-	codeCacheRepository repository.CodeCache
-	conf                config.SendEmailCodeConfig
+	userRepository          repository.User
+	codeCacheRepository     repository.CodeCache
+	conf                    config.SendEmailCodeConfig
+	userNameCacheRepository repository.UserNameCache
 }
 
 func NewUserManager() *UserManager {
 	return &UserManager{
-		userRepository:      repository.GetBlogUserRepository(),
-		codeCacheRepository: repository.GetBlogCodeCacheRepository(),
-		conf:                config.GetConfig().Email,
+		userRepository:          repository.GetBlogUserRepository(),
+		codeCacheRepository:     repository.GetBlogCodeCacheRepository(),
+		userNameCacheRepository: repository.GetUserNameCacheRepository(),
+		conf:                    config.GetConfig().Email,
 	}
 }
 
@@ -140,10 +142,16 @@ func (u *UserManager) UserNameExist(ctx context.Context, req *blog.UserNameExist
 		logs.Error(ctx, "用户名为空", zap.String("Error", consts.UserNameOrPasswordIsNULL.Error()))
 		return newUserNameExistResponse(withUserNameExistResponse(int32(consts.UserNameExistErrCode), consts.UserNameIsNull.Error(), nil)), nil
 	}
+	// 查询用户名是否存在
+	exist := u.userNameCacheRepository.IsUserNameExist(req.Username)
+	if !exist {
+		logs.Info(ctx, "用户名不存在，可以设置", zap.String("UserName", req.Username))
+		return newUserNameExistResponse(withUserNameExistResponse(consts.StatusOK, consts.StatusSuccess, &blog.UserNameExistInfo{Exist: exist})), nil
+	}
 	_, err := u.userRepository.GetUserByName(req.Username)
 	if err == nil {
 		logs.Error(ctx, "用户名已存在", zap.String("Error", consts.UserNameIsExist.Error()))
-		return newUserNameExistResponse(withUserNameExistResponse(int32(consts.UserNameExistErrCode), consts.UserNameIsExist.Error(), nil)), nil
+		return newUserNameExistResponse(withUserNameExistResponse(int32(consts.UserNameExistErrCode), consts.UserNameIsExist.Error(), &blog.UserNameExistInfo{Exist: true})), nil
 	}
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		logs.Error(ctx, "查询用户失败", zap.String("Error", err.Error()))
@@ -262,6 +270,11 @@ func (u *UserManager) SetUserName(ctx context.Context, req *blog.SetUserNameRequ
 	if err != nil {
 		logs.Error(ctx, "设置用户名失败", zap.String("Error", err.Error()))
 		return newEmptyResponse(withEmptyResponse(int32(consts.SetUserNameErrCode), consts.SerUserNameErr.Error())), nil
+	}
+	err = u.userNameCacheRepository.SetUserName(req.Username)
+	if err != nil {
+		logs.Error(ctx, "设置用户名缓存失败", zap.String("Error", err.Error()))
+		return newEmptyResponse(withEmptyResponse(int32(consts.SetUserNameErrCode), "缓存用户名失败")), nil
 	}
 	return newEmptyResponse(), nil
 }

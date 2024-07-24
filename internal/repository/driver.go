@@ -13,6 +13,9 @@ var (
 
 	_blogCodeCacheRepository     CodeCache
 	_blogCodeCacheRepositoryOnce sync.Once // 保证单例
+
+	_blogUserNameCacheRepository     UserNameCache
+	_blogUserNameCacheRepositoryOnce sync.Once // 保证单例
 )
 
 func Init() {
@@ -33,4 +36,11 @@ func GetBlogCodeCacheRepository() CodeCache {
 		_blogCodeCacheRepository = redis.NewCodeCache()
 	})
 	return _blogCodeCacheRepository
+}
+
+func GetUserNameCacheRepository() UserNameCache {
+	_blogUserNameCacheRepositoryOnce.Do(func() {
+		_blogUserNameCacheRepository = redis.NewUserNameCache()
+	})
+	return _blogUserNameCacheRepository
 }
