@@ -3,7 +3,6 @@ package business
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/nepu-SidneyYu/blog-grpc/internal/config"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/consts"
@@ -125,7 +124,6 @@ func (u *UserManager) UserLogin(ctx context.Context, req *blog.UserLoginRequest)
 		logs.Error(ctx, "生成token失败", zap.String("Error", err.Error()))
 		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserLoginErrCode), consts.UserLoginErr.Error(), nil)), nil
 	}
-	fmt.Println(token)
 	data := &blog.UserInfo{
 		Id:              int32(userInfo.ID),
 		Nickname:        "测试用户",
@@ -184,6 +182,19 @@ func (u *UserManager) UserRegister(ctx context.Context, req *blog.UserRegisterRe
 		logs.Error(ctx, "密码为空", zap.String("Error", consts.UserNameOrPasswordIsNULL.Error()))
 		return newEmptyResponse(withEmptyResponse(int32(consts.UserRegisterErrCode), consts.UserRegisterPasswordIsNULL.Error())), nil
 	}
+	if req.Code == "" {
+		logs.Error(ctx, "验证码为空", zap.String("Error", consts.CodeIsNULL.Error()))
+		return newEmptyResponse(withEmptyResponse(int32(consts.UserRegisterErrCode), consts.CodeIsNULL.Error())), nil
+	}
+	code, err := u.codeCacheRepository.GetPhoneCode(consts.PhoneCodeFeild, req.Phone)
+	if err != nil {
+		logs.Error(ctx, "获取验证码失败", zap.String("Error", err.Error()))
+		return newEmptyResponse(withEmptyResponse(int32(consts.UserRegisterErrCode), consts.GetPhoneCodeErr.Error())), nil
+	}
+	if code != req.Code {
+		logs.Error(ctx, "验证码错误", zap.String("Error", "验证码错误"))
+		return newEmptyResponse(withEmptyResponse(int32(consts.UserRegisterErrCode), consts.CodeIsErr.Error())), nil
+	}
 	hashpassword, err := utils.BcryptHash(req.Password)
 	if err != nil {
 		logs.Error(ctx, "密码加密失败", zap.String("Error", err.Error()))
@@ -214,6 +225,11 @@ func (u *UserManager) BindEmail(ctx context.Context, req *blog.BindEmailRequest)
 		return newEmptyResponse(withEmptyResponse(int32(consts.BindEmailErrCode), "验证码错误")), nil
 	}
 	//TODO：绑定邮箱
+	err = u.userRepository.BindEmail(req.Phone, req.Email)
+	if err != nil {
+		logs.Error(ctx, "绑定邮箱失败", zap.String("Error", err.Error()))
+		return newEmptyResponse(withEmptyResponse(int32(consts.BindEmailErrCode), consts.BindEmailErr.Error())), nil
+	}
 	return newEmptyResponse(), nil
 }
 
@@ -248,4 +264,77 @@ func (u *UserManager) SetUserName(ctx context.Context, req *blog.SetUserNameRequ
 		return newEmptyResponse(withEmptyResponse(int32(consts.SetUserNameErrCode), consts.SerUserNameErr.Error())), nil
 	}
 	return newEmptyResponse(), nil
+}
+
+func (u *UserManager) UserUsePhoneLogin(ctx context.Context, req *blog.UserUsePhoneLoginRequest) (*blog.UserLoginResponse, error) {
+	if req.Phone == "" {
+		logs.Error(ctx, "手机号为空", zap.String("Error", consts.PhoneIsNULL.Error()))
+		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserUsePhoneLoginErrCode), consts.PhoneIsNULL.Error(), nil)), nil
+	}
+	user, err := u.userRepository.GetUserByPhone(req.Phone)
+	if err != nil {
+
+		if err == gorm.ErrRecordNotFound {
+			logs.Error(ctx, "用户不存在", zap.String("Error", err.Error()))
+			return newUserLoginResponse(withUserLoginResponse(int32(consts.UserUsePhoneLoginErrCode), consts.PhoneNotRegister.Error(), nil)), nil
+		}
+		logs.Error(ctx, "获取用户失败", zap.String("Error", err.Error()))
+		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserUsePhoneLoginErrCode), "获取用户信息失败", nil)), nil
+	}
+	if !utils.BcryptCheck(req.Password, user.Password) {
+		logs.Error(ctx, "密码错误", zap.String("Error", consts.UserLoginErr.Error()))
+		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserUsePhoneLoginErrCode), consts.UserLoginErr.Error(), nil)), nil
+	}
+	// 生成token
+	conf := config.GetConfig().JWt
+	token, err := jwt.CreateToken(conf.Secret, conf.Issuer, int(conf.Expire), user.ID)
+	if err != nil {
+		logs.Error(ctx, "生成token失败", zap.String("Error", err.Error()))
+		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserUsePhoneLoginErrCode), consts.UserLoginErr.Error(), nil)), nil
+	}
+	data := &blog.UserInfo{
+		Id:              int32(user.ID),
+		Nickname:        "测试用户",
+		Token:           token,
+		ArticlesLikeSet: []string{},
+		CommentsLikeSet: []string{},
+	}
+	logs.Info(ctx, "登录成功", zap.String("UserName", req.Phone))
+	return newUserLoginResponse(withUserLoginResponse(consts.StatusOK, consts.StatusSuccess, data)), nil
+}
+func (u *UserManager) UserUseEmailLogin(ctx context.Context, req *blog.UserUseEmailLoginRequest) (*blog.UserLoginResponse, error) {
+	if req.Email == "" {
+		logs.Error(ctx, "邮箱为空", zap.String("Error", consts.EmailIsNULL.Error()))
+		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserUseEmailLoginErrCode), consts.EmailIsNULL.Error(), nil)), nil
+	}
+	user, err := u.userRepository.GetUserByEmail(req.Email)
+	if err != nil {
+
+		if err == gorm.ErrRecordNotFound {
+			logs.Error(ctx, "用户不存在", zap.String("Error", err.Error()))
+			return newUserLoginResponse(withUserLoginResponse(int32(consts.UserUseEmailLoginErrCode), consts.EmailNotBind.Error(), nil)), nil
+		}
+		logs.Error(ctx, "获取用户失败", zap.String("Error", err.Error()))
+		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserUseEmailLoginErrCode), "获取用户信息失败", nil)), nil
+	}
+	if !utils.BcryptCheck(req.Password, user.Password) {
+		logs.Error(ctx, "密码错误", zap.String("Error", consts.UserLoginErr.Error()))
+		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserUseEmailLoginErrCode), consts.UserLoginErr.Error(), nil)), nil
+	}
+	// 生成token
+	conf := config.GetConfig().JWt
+	token, err := jwt.CreateToken(conf.Secret, conf.Issuer, int(conf.Expire), user.ID)
+	if err != nil {
+		logs.Error(ctx, "生成token失败", zap.String("Error", err.Error()))
+		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserUseEmailLoginErrCode), consts.UserLoginErr.Error(), nil)), nil
+	}
+	data := &blog.UserInfo{
+		Id:              int32(user.ID),
+		Nickname:        "测试用户",
+		Token:           token,
+		ArticlesLikeSet: []string{},
+		CommentsLikeSet: []string{},
+	}
+	logs.Info(ctx, "登录成功", zap.String("UserEmail", req.Email))
+	return newUserLoginResponse(withUserLoginResponse(consts.StatusOK, consts.StatusSuccess, data)), nil
 }

@@ -7,4 +7,7 @@ type User interface {
 	GetUserByName(name string) (*model.UserAuth, error)
 	SetUser(Phone, password string) error
 	SetUserName(phone, name string) error
+	BindEmail(phone, email string) error
+	GetUserByPhone(phone string) (*model.UserAuth, error)
+	GetUserByEmail(email string) (*model.UserAuth, error)
 }
