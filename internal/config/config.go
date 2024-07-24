@@ -106,8 +106,8 @@ func loadNacosConfig() {
 	if err != nil {
 		logs.Fatal(context.Background(), "解析Nacos配置信息失败", zap.String("error", err.Error()))
 	}
-	username := p.GetString("nacos.zhihuishu.server.username")
-	password := p.GetString("nacos.zhihuishu.server.password")
+	username := p.GetString("nacos.zhihuishu.server.username", "")
+	password := p.GetString("nacos.zhihuishu.server.password", "")
 	if username == "" || password == "" {
 		logs.Fatal(context.Background(), "Nacos配置信息不完整", zap.String("error", "nacos.zhihuishu.server.username or nacos.zhihuishu.server.password is empty"))
 	}
@@ -118,7 +118,7 @@ func loadNacosConfig() {
 func LoadConfig() {
 	loadNacosConfig()
 
-	clientConfig := &constant.ClientConfig{
+	clientConfig := constant.ClientConfig{
 		NamespaceId:          "pract",
 		NotLoadCacheAtStart:  true,
 		LogDir:               "/tmp/nacos/log",
@@ -137,8 +137,8 @@ func LoadConfig() {
 		},
 	}
 	configClient, err := clients.NewConfigClient(
-		vo.ConfigParam{
-			ClientConfig:  clientConfig,
+		vo.NacosClientParam{
+			ClientConfig:  &clientConfig,
 			ServerConfigs: serverConfigs,
 		},
 	)

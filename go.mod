@@ -53,6 +53,7 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
+	github.com/magiconair/properties v1.8.7
 	github.com/nacos-group/nacos-sdk-go/v2 v2.2.7
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/crypto v0.24.0
