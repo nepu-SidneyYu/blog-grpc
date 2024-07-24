@@ -41,6 +41,9 @@ const (
 )
 
 const (
-	EmailCodeFeild = "email_code"
-	PhoneCodeFeild = "phone_code"
+	EmailCodeFeild    = "email_code"
+	PhoneCodeFeild    = "phone_code"
+	UserNameFiled     = "user_name"
+	UserNameErrorRate = 0.0001
+	UserNameCampacity = 1000000
 )
