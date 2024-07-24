@@ -153,13 +153,13 @@ func LoadConfig() {
 	if err != nil {
 		logs.Fatal(context.Background(), "获取项目启动配置信息失败", zap.String("error", err.Error()))
 	}
-	logs.Info(context.Background(), "项目配置", zap.String("content", fmt.Sprintf("%s\n", content)))
+	logs.Info(context.Background(), "项目配置", zap.String("content", fmt.Sprintf("%#v\n", content)))
 
 	err = yaml.Unmarshal([]byte(content), &_config)
 	if err != nil {
 		logs.Fatal(context.Background(), "解析项目启动配置信息失败", zap.String("error", err.Error()))
 	}
-	logs.Info(context.Background(), "加载项目启动配置信息成功", zap.String("_config", fmt.Sprintf("%s\n", _config)))
+	logs.Info(context.Background(), "加载项目启动配置信息成功", zap.String("_config", fmt.Sprintf("%#v\n", _config)))
 
 	// data, err := os.ReadFile("conf.yaml")
 	// if err != nil {
