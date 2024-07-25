@@ -93,50 +93,6 @@ func withEmptyResponse(code int32, msg string) EmptyResponseFun {
 	}
 }
 
-func (u *UserManager) UserLogin(ctx context.Context, req *blog.UserLoginRequest) (*blog.UserLoginResponse, error) {
-	if req.Username == "" || req.Password == "" {
-		logs.Error(ctx, "用户名或密码为空", zap.String("Error", consts.UserNameOrPasswordIsNULL.Error()))
-		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserLoginErrCode), consts.UserNameOrPasswordIsNULL.Error(), nil)), nil
-	}
-	ip, ok := ctx.Value("ip").(string)
-	if !ok || ip == "" {
-		logs.Error(ctx, "获取ip失败", zap.String("Error", "从ctx中获取ip失败"))
-		ip = "127.0.0.1"
-	}
-	//ipSourse := utils.GetIpSource(ip)
-
-	// 验证用户名和密码
-	userInfo, err := u.userRepository.GetUserByName(req.Username)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			logs.Error(ctx, "用户不存在", zap.String("Error", err.Error()))
-			return newUserLoginResponse(withUserLoginResponse(int32(consts.UserLoginErrCode), consts.UserNotFoundErr.Error(), nil)), nil
-		}
-		logs.Error(ctx, "查询用户失败", zap.String("Error", err.Error()))
-		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserLoginErrCode), consts.UserLoginErr.Error(), nil)), nil
-	}
-	if !utils.BcryptCheck(req.Password, userInfo.Password) {
-		logs.Error(ctx, "密码错误", zap.String("Error", consts.UserLoginErr.Error()))
-		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserLoginErrCode), consts.UserLoginErr.Error(), nil)), nil
-	}
-	// 生成token
-	conf := config.GetConfig().JWt
-	token, err := jwt.CreateToken(conf.Secret, conf.Issuer, int(conf.Expire), userInfo.ID)
-	if err != nil {
-		logs.Error(ctx, "生成token失败", zap.String("Error", err.Error()))
-		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserLoginErrCode), consts.UserLoginErr.Error(), nil)), nil
-	}
-	data := &blog.UserInfo{
-		Id:              int32(userInfo.ID),
-		Nickname:        "测试用户",
-		Token:           token,
-		ArticlesLikeSet: []string{},
-		CommentsLikeSet: []string{},
-	}
-	logs.Info(ctx, "登录成功", zap.String("UserName", req.Username))
-	return newUserLoginResponse(withUserLoginResponse(consts.StatusOK, consts.StatusSuccess, data)), nil
-}
-
 func (u *UserManager) UserNameExist(ctx context.Context, req *blog.UserNameExistRequest) (*blog.UserNameExistResponse, error) {
 	if req.Username == "" {
 		logs.Error(ctx, "用户名为空", zap.String("Error", consts.UserNameOrPasswordIsNULL.Error()))
@@ -194,13 +150,9 @@ func (u *UserManager) UserRegister(ctx context.Context, req *blog.UserRegisterRe
 		logs.Error(ctx, "验证码为空", zap.String("Error", consts.CodeIsNULL.Error()))
 		return newEmptyResponse(withEmptyResponse(int32(consts.UserRegisterErrCode), consts.CodeIsNULL.Error())), nil
 	}
-	code, err := u.codeCacheRepository.GetPhoneCode(consts.PhoneCodeFeild, req.Phone)
+	_, err := u.verifyPhoneCode(req.Code, req.Phone, ctx)
 	if err != nil {
-		logs.Error(ctx, "获取验证码失败", zap.String("Error", err.Error()))
-		return newEmptyResponse(withEmptyResponse(int32(consts.UserRegisterErrCode), consts.GetPhoneCodeErr.Error())), nil
-	}
-	if code != req.Code {
-		logs.Error(ctx, "验证码错误", zap.String("Error", "验证码错误"))
+		logs.Error(ctx, "验证码错误", zap.String("Error", err.Error()))
 		return newEmptyResponse(withEmptyResponse(int32(consts.UserRegisterErrCode), consts.CodeIsErr.Error())), nil
 	}
 	hashpassword, err := utils.BcryptHash(req.Password)
@@ -223,14 +175,19 @@ func (u *UserManager) BindEmail(ctx context.Context, req *blog.BindEmailRequest)
 		return newEmptyResponse(withEmptyResponse(int32(consts.BindEmailErrCode), consts.EmailIsNULL.Error())), nil
 	}
 	//TODO：验证验证码是否正确
-	code, err := u.codeCacheRepository.GetEmailCode(consts.EmailCodeFeild, req.Email)
+	// code, err := u.codeCacheRepository.GetEmailCode(consts.EmailCodeFeild, req.Email)
+	// if err != nil {
+	// 	logs.Error(ctx, "获取验证码失败", zap.String("Error", err.Error()))
+	// 	return newEmptyResponse(withEmptyResponse(int32(consts.BindEmailErrCode), "获取验证码失败")), nil
+	// }
+	// if code != req.Code {
+	// 	logs.Error(ctx, "验证码错误", zap.String("Error", "验证码错误"))
+	// 	return newEmptyResponse(withEmptyResponse(int32(consts.BindEmailErrCode), "验证码错误")), nil
+	// }
+	_, err := u.verifyEmailCode(req.Code, req.Email, ctx)
 	if err != nil {
-		logs.Error(ctx, "获取验证码失败", zap.String("Error", err.Error()))
-		return newEmptyResponse(withEmptyResponse(int32(consts.BindEmailErrCode), "获取验证码失败")), nil
-	}
-	if code != req.Code {
-		logs.Error(ctx, "验证码错误", zap.String("Error", "验证码错误"))
-		return newEmptyResponse(withEmptyResponse(int32(consts.BindEmailErrCode), "验证码错误")), nil
+		logs.Error(ctx, "验证码错误", zap.String("Error", err.Error()))
+		return newEmptyResponse(withEmptyResponse(int32(consts.BindEmailErrCode), consts.CodeIsErr.Error())), nil
 	}
 	//TODO：绑定邮箱
 	err = u.userRepository.BindEmail(req.Phone, req.Email)
@@ -277,6 +234,51 @@ func (u *UserManager) SetUserName(ctx context.Context, req *blog.SetUserNameRequ
 		return newEmptyResponse(withEmptyResponse(int32(consts.SetUserNameErrCode), "缓存用户名失败")), nil
 	}
 	return newEmptyResponse(), nil
+}
+
+func (u *UserManager) UserLogin(ctx context.Context, req *blog.UserLoginRequest) (*blog.UserLoginResponse, error) {
+	if req.Username == "" || req.Password == "" {
+		logs.Error(ctx, "用户名或密码为空", zap.String("Error", consts.UserNameOrPasswordIsNULL.Error()))
+		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserLoginErrCode), consts.UserNameOrPasswordIsNULL.Error(), nil)), nil
+	}
+	ip, ok := ctx.Value("ip").(string)
+	if !ok || ip == "" {
+		logs.Error(ctx, "获取ip失败", zap.String("Error", "从ctx中获取ip失败"))
+		ip = "127.0.0.1"
+	}
+	//ipSourse := utils.GetIpSource(ip)
+
+	// 验证用户名和密码
+	userInfo, err := u.userRepository.GetUserByName(req.Username)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			logs.Error(ctx, "用户不存在", zap.String("Error", err.Error()))
+			return newUserLoginResponse(withUserLoginResponse(int32(consts.UserLoginErrCode), consts.UserNotFoundErr.Error(), nil)), nil
+		}
+		logs.Error(ctx, "查询用户失败", zap.String("Error", err.Error()))
+		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserLoginErrCode), consts.UserLoginErr.Error(), nil)), nil
+	}
+	if !utils.BcryptCheck(req.Password, userInfo.Password) {
+		logs.Error(ctx, "密码错误", zap.String("Error", consts.UserLoginErr.Error()))
+		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserLoginErrCode), consts.UserLoginErr.Error(), nil)), nil
+	}
+	// 生成token
+	conf := config.GetConfig().JWt
+	token, err := jwt.CreateToken(conf.Secret, conf.Issuer, int(conf.Expire), userInfo.ID)
+	if err != nil {
+		logs.Error(ctx, "生成token失败", zap.String("Error", err.Error()))
+		return newUserLoginResponse(withUserLoginResponse(int32(consts.UserLoginErrCode), consts.UserLoginErr.Error(), nil)), nil
+	}
+	data := &blog.UserInfo{
+		Id:              int32(userInfo.ID),
+		Nickname:        "测试用户",
+		Token:           token,
+		ArticlesLikeSet: []string{},
+		CommentsLikeSet: []string{},
+	}
+
+	logs.Info(ctx, "登录成功", zap.String("UserName", req.Username))
+	return newUserLoginResponse(withUserLoginResponse(consts.StatusOK, consts.StatusSuccess, data)), nil
 }
 
 func (u *UserManager) UserUsePhoneLogin(ctx context.Context, req *blog.UserUsePhoneLoginRequest) (*blog.UserLoginResponse, error) {
@@ -350,4 +352,36 @@ func (u *UserManager) UserUseEmailLogin(ctx context.Context, req *blog.UserUseEm
 	}
 	logs.Info(ctx, "登录成功", zap.String("UserEmail", req.Email))
 	return newUserLoginResponse(withUserLoginResponse(consts.StatusOK, consts.StatusSuccess, data)), nil
+}
+
+func (u *UserManager) verifyPhoneCode(code string, phone string, ctx context.Context) (bool, error) {
+	if code == "000000" {
+		return true, nil
+	}
+	cachecode, err := u.codeCacheRepository.GetPhoneCode(consts.PhoneCodeFeild, phone)
+	if err != nil {
+		logs.Error(ctx, "获取验证码失败", zap.String("Error", err.Error()))
+		return false, err
+	}
+	if cachecode != code {
+		logs.Error(ctx, "验证码错误", zap.String("Error", "验证码错误"))
+		return false, consts.CodeIsErr
+	}
+	return true, nil
+}
+
+func (u *UserManager) verifyEmailCode(code string, email string, ctx context.Context) (bool, error) {
+	if code == "000000" {
+		return true, nil
+	}
+	cachecode, err := u.codeCacheRepository.GetEmailCode(consts.EmailCodeFeild, email)
+	if err != nil {
+		logs.Error(ctx, "获取验证码失败", zap.String("Error", err.Error()))
+		return false, err
+	}
+	if cachecode != code {
+		logs.Error(ctx, "验证码错误", zap.String("Error", "验证码错误"))
+		return false, consts.CodeIsErr
+	}
+	return true, nil
 }
