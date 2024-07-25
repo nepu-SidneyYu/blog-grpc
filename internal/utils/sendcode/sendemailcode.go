@@ -30,7 +30,7 @@ func sendVerificationCode(to string, code string) error {
 	// 创建一个新的邮件实例
 	conf := config.GetConfig().Email
 	em := email.NewEmail()
-	em.From = fmt.Sprintf("<%s> %s", conf.NickName, conf.From)
+	em.From = fmt.Sprintf("%s<%s>", conf.NickName, conf.From)
 	em.To = []string{to}
 	em.Subject = ""
 	// 设置邮件的HTML内容

@@ -7,6 +7,7 @@ import (
 
 	"github.com/nepu-SidneyYu/blog-grpc/internal/config"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/logs"
+	"github.com/nepu-SidneyYu/blog-grpc/internal/model"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -36,7 +37,7 @@ func Init() {
 		}
 		// 自动迁移数据库表结构
 		err = _db.AutoMigrate(
-		// &mysql.User{},
+			&model.UserAuth{},
 		)
 		// 如果迁移失败，则输出错误信息并退出程序
 		if err != nil {
