@@ -29,6 +29,7 @@ func (*Server) Service() {
 		grpc.UnaryInterceptor(interceptor.TraceServerInterceptor()),
 	)
 	v1.RegisterUserServer(server, business.NewUserManager())
+	v1.RegisterChatServer(server, business.NewChatManager())
 	logs.Info(context.Background(), "服务注册成功")
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", "192.168.184.129", config.GetConfig().Port))
 	if err != nil {

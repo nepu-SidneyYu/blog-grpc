@@ -32,6 +32,7 @@ func (u *UsernameCache) SetUserName(name string) error {
 func (u *UsernameCache) IsUserNameExist(name string) bool {
 	return _cache.BFExists(context.Background(), consts.UserNameFiled, name).Val()
 }
-func (u UsernameCache) SetUserOnline(id string) error {
 
-}
+// func (u UsernameCache) SetUserOnline(id string) error {
+
+// }

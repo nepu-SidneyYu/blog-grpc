@@ -2,6 +2,7 @@ package business
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/nepu-SidneyYu/blog-grpc/internal/consts"
@@ -12,13 +13,17 @@ type ChatManager struct {
 	blog.UnimplementedChatServer
 }
 
-func (c *ChatManager) Chat(ctx context.Context, req *blog.ChatRequest, stream blog.ChatServer) error {
+func NewChatManager() *ChatManager { return &ChatManager{} }
+
+func (c *ChatManager) Chat(ctx context.Context, req *blog.ChatRequest, stream blog.Chat_ChatServer) (*blog.ChatResponse, error) {
+
 	for i := 0; i < 5; i++ { // 假设我们发送5个部分响应
 		time.Sleep(1 * time.Second) // 模拟处理时间
-		if err := stream.Chat(&blog.ChatResponse{Code: consts.StatusOK, Msg: consts.StatusSuccess, Content: string(i + 1)}); err != nil {
-			return err
+		if err := stream.Send(&blog.ChatResponse{Code: consts.StatusOK, Msg: consts.StatusSuccess, Content: strconv.Itoa(i + 1)}); err != nil {
+			return nil, err
 		}
 	}
+	return nil, nil
 }
 
 // package main
