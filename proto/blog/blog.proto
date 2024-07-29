@@ -107,4 +107,42 @@ service User{
     rpc SendPhoneCode(SendPhoneCodeRequest) returns (EmptyResponse){}
 }
 
+message CreateSessionRequest{
+    google.protobuf.Empty data = 1;
+}
+message CreateSessionResponse{
+    int32 code = 1;
+    string msg = 2;
+    SessionInfo data = 3;
+}
+message SessionInfo{
+    string sessionId = 1;
+}
+message CloseSessionRequest {
+    string sessionId = 1;
+}
+message CloseSessionResponse{
+    int32 code = 1;
+    string msg = 2;
+    google.protobuf.Empty data = 3;
+}
+
+message  ChatRequest{
+    string content = 2;
+}
+
+message ChatResponse{
+    int32 code = 1;
+    string msg = 2;
+    string content = 3;
+}
+message Question{
+    string role = 1;
+    string content = 2;
+}
+service Chat{
+    rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse){}
+    rpc CloseSession(CloseSessionRequest) returns (CloseSessionResponse){}
+    rpc Chat(ChatRequest) returns (stream ChatResponse){}
+}
 
