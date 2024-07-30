@@ -3,6 +3,7 @@ package business
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/nepu-SidneyYu/blog-grpc/internal/config"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/consts"
@@ -138,6 +139,7 @@ func (u *UserManager) SendPhoneCode(ctx context.Context, req *blog.SendPhoneCode
 }
 
 func (u *UserManager) UserRegister(ctx context.Context, req *blog.UserRegisterRequest) (*blog.EmptyResponse, error) {
+	logs.Info(ctx, "用户注册", zap.String(">>>>>>>>>>Phone", fmt.Sprintf("%#v", req)))
 	if req.Phone == "" {
 		logs.Error(ctx, "手机号为空", zap.String("Error", consts.PhoneIsNULL.Error()))
 		return newEmptyResponse(withEmptyResponse(int32(consts.UserRegisterErrCode), consts.PhoneIsNULL.Error())), nil
