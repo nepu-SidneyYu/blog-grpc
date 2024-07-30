@@ -2,6 +2,7 @@ package business
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/nepu-SidneyYu/blog-grpc/internal/consts"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/logs"
@@ -18,11 +19,6 @@ type ChatManager struct {
 func NewChatManager() *ChatManager { return &ChatManager{} }
 
 func (c *ChatManager) Chat(req *blog.ChatRequest, stream blog.Chat_ChatServer) error {
-	// ctx := stream.Context()
-	// if ctx.Err() != nil {
-	// 	logs.Error(ctx, "context error", zap.String("error", ctx.Err().Error()))
-	// 	return ctx.Err()
-	// }
 	request := &model.Request{
 		Model:       consts.ModelName,
 		MaxTokens:   consts.MaxTokens,
@@ -35,18 +31,36 @@ func (c *ChatManager) Chat(req *blog.ChatRequest, stream blog.Chat_ChatServer) e
 		Role:    "user",
 		Content: req.Content,
 	})
+	// for i := 0; i < 500; i++ {
+	// 	//time.Sleep(1 * time.Second)
+	// 	if err := stream.Send(&blog.ChatResponse{Code: consts.StatusOK, Msg: consts.StatusSuccess, Content: strconv.Itoa(i + 1)}); err != nil {
+	// 		logs.Error(context.Background(), "stream send error", zap.String("error", err.Error()))
+	// 	}
+	// }
+	done := make(chan bool)
 	go func() {
-		done := make(chan struct{})
 		utils.Chat(request, func(r *model.Response) {
 			if err := stream.Send(&blog.ChatResponse{Code: consts.StatusOK, Msg: consts.StatusSuccess, Content: r.Content}); err != nil {
+				//fmt.Println(">>>>")
 				logs.Error(context.Background(), "stream send error", zap.String("error", err.Error()))
 			}
-			if r.Stop {
-				done <- struct{}{}
-			}
 		})
-		<-done
+		done <- true
 	}()
+	<-done
+	// go utils.Chat(request, func(r *model.Response) {
+	// 	if err := stream.Send(&blog.ChatResponse{Code: consts.StatusOK, Msg: consts.StatusSuccess, Content: r.Content}); err != nil {
+	// 		logs.Error(context.Background(), "stream send error", zap.String("error", err.Error()))
+	// 	}
+	// 	//time.Sleep(1 * time.Second)
+	// })
+
+	// go utils.Chat(request, func(r *model.Response) {
+	// 	if err := stream.Send(&blog.ChatResponse{Code: consts.StatusOK, Msg: consts.StatusSuccess, Content: r.Content}); err != nil {
+	// 		logs.Error(context.Background(), "stream send error", zap.String("error", err.Error()))
+	// 	}
+	// 	//time.Sleep(1 * time.Second)
+	// })
 	return nil
 }
 

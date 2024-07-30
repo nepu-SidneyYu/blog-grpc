@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/nepu-SidneyYu/blog-grpc/internal/logs"
@@ -83,6 +84,7 @@ type botAiChat struct {
 // }
 
 func Chat(req *model.Request, fn func(*model.Response)) error {
+	fmt.Println("Chat")
 	url := "https://ai-platform-cloud-proxy.polymas.com/chat-llm/v1/completions/stream/multi"
 	jsonvalue, _ := json.Marshal(req)
 	request, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonvalue))
@@ -90,9 +92,11 @@ func Chat(req *model.Request, fn func(*model.Response)) error {
 		logs.Error(context.Background(), "创建请求失败", zap.String("error", err.Error()))
 		return err
 	}
+	fmt.Println("请求成功")
 	request.Header.Set("Content-Type", "application/json")
 	client := http.Client{}
 	resp, err := client.Do(request)
+	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 	if err != nil {
 		logs.Error(context.Background(), "请求失败", zap.String("error", err.Error()))
 		return err
@@ -126,6 +130,7 @@ func Chat(req *model.Request, fn func(*model.Response)) error {
 			respe.Content = result.Content
 			respe.Stop = result.Stop
 			mess.Content += result.Content
+			fmt.Println(respe.Content)
 			fn(respe)
 			if result.Stop {
 				respe.Stop = true
