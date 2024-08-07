@@ -1,8 +1,6 @@
 package business
 
 import (
-	"context"
-
 	"github.com/nepu-SidneyYu/blog-grpc/internal/consts"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/logs"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/model"
@@ -31,30 +29,30 @@ func (c *ChatManager) Chat(req *blog.ChatRequest, stream blog.Chat_ChatServer) e
 		Content: req.Content,
 	})
 	// for i := 0; i < 500; i++ {
-	// 	//time.Sleep(1 * time.Second)
+	// 	time.Sleep(500 * time.Millisecond)
 	// 	if err := stream.Send(&blog.ChatResponse{Code: consts.StatusOK, Msg: consts.StatusSuccess, Content: strconv.Itoa(i + 1)}); err != nil {
-	// 		logs.Error(context.Background(), "stream send error", zap.String("error", err.Error()))
+	// 		logs.Error(stream.Context(), "stream send error", zap.String("error", err.Error()))
 	// 	}
 	// }
+	//
 	done := make(chan bool)
-	go func() {
-		utils.Chat(request, func(r *model.Response) {
-			if err := stream.Send(&blog.ChatResponse{Code: consts.StatusOK, Msg: consts.StatusSuccess, Content: r.Content}); err != nil {
-				//fmt.Println(">>>>")
-				logs.Error(context.Background(), "stream send error", zap.String("error", err.Error()))
-			}
-		})
-		done <- true
-	}()
+	go utils.Chat(request, func(r *model.Response) {
+		if err := stream.Send(&blog.ChatResponse{Code: consts.StatusOK, Msg: consts.StatusSuccess, Content: r.Content}); err != nil {
+			logs.Error(stream.Context(), "stream send error", zap.String("error", err.Error()))
+		}
+		if r.Stop {
+			done <- true
+		}
+	})
 	<-done
-	// go utils.Chat(request, func(r *model.Response) {
-	// 	if err := stream.Send(&blog.ChatResponse{Code: consts.StatusOK, Msg: consts.StatusSuccess, Content: r.Content}); err != nil {
-	// 		logs.Error(context.Background(), "stream send error", zap.String("error", err.Error()))
-	// 	}
-	// 	//time.Sleep(1 * time.Second)
-	// })
 
 	// go utils.Chat(request, func(r *model.Response) {
+	// 	if err := stream.Send(&blog.ChatResponse{Code: consts.StatusOK, Msg: consts.StatusSuccess, Content: r.Content}); err != nil {
+	// 		logs.Error(stream.Context(), "stream send error", zap.String("error", err.Error()))
+	// 	}
+	// })
+
+	// utils.Chat(request, func(r *model.Response) {
 	// 	if err := stream.Send(&blog.ChatResponse{Code: consts.StatusOK, Msg: consts.StatusSuccess, Content: r.Content}); err != nil {
 	// 		logs.Error(context.Background(), "stream send error", zap.String("error", err.Error()))
 	// 	}

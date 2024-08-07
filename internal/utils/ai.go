@@ -89,21 +89,18 @@ func Chat(req *model.Request, fn func(*model.Response)) error {
 	jsonvalue, _ := json.Marshal(req)
 	request, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonvalue))
 	if err != nil {
-		logs.Error(context.Background(), "创建请求失败", zap.String("error", err.Error()))
+		logs.Error(context.Background(), "create request failed", zap.String("error", err.Error()))
 		return err
 	}
-	fmt.Println("请求成功")
 	request.Header.Set("Content-Type", "application/json")
 	client := http.Client{}
 	resp, err := client.Do(request)
-	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 	if err != nil {
-		logs.Error(context.Background(), "请求失败", zap.String("error", err.Error()))
+		logs.Error(context.Background(), "request failed", zap.String("error", err.Error()))
 		return err
 	}
 	go func() {
 		defer resp.Body.Close()
-		// 读取响应体数据
 
 		reader := bufio.NewReader(resp.Body)
 		var respe = new(model.Response)
@@ -113,7 +110,7 @@ func Chat(req *model.Request, fn func(*model.Response)) error {
 		for {
 			line, err := reader.ReadBytes('\n')
 			if err != nil {
-				logs.Error(context.Background(), "读取响应失败", zap.String("error", err.Error()))
+				logs.Error(context.Background(), "read response body failed", zap.String("error", err.Error()))
 				return
 			}
 			line = bytes.TrimSpace(line)
@@ -124,7 +121,7 @@ func Chat(req *model.Request, fn func(*model.Response)) error {
 
 			err = json.Unmarshal(line, &result)
 			if err != nil {
-				logs.Error(context.Background(), "解析响应失败", zap.String("error", err.Error()))
+				logs.Error(context.Background(), "umarshal response body failed", zap.String("error", err.Error()))
 				return
 			}
 			respe.Content = result.Content
