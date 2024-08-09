@@ -11,6 +11,8 @@ var (
 	_blogUserRepository     User
 	_blogUserRepositoryOnce sync.Once // 保证单例
 
+	_blogChatRepository Chat
+
 	_blogCodeCacheRepository     CodeCache
 	_blogCodeCacheRepositoryOnce sync.Once // 保证单例
 

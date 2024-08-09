@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/nepu-SidneyYu/blog-grpc/internal/logs"
@@ -84,7 +83,6 @@ type botAiChat struct {
 // }
 
 func Chat(req *model.Request, fn func(*model.Response)) error {
-	fmt.Println("Chat")
 	url := "https://ai-platform-cloud-proxy.polymas.com/chat-llm/v1/completions/stream/multi"
 	jsonvalue, _ := json.Marshal(req)
 	request, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonvalue))
@@ -104,7 +102,6 @@ func Chat(req *model.Request, fn func(*model.Response)) error {
 
 		reader := bufio.NewReader(resp.Body)
 		var respe = new(model.Response)
-		//count := 0
 		var mess = new(model.Message)
 		var result = new(model.Response)
 		for {
@@ -117,8 +114,6 @@ func Chat(req *model.Request, fn func(*model.Response)) error {
 			if len(line) == 0 {
 				continue
 			}
-			//res := bytes.TrimPrefix(line, []byte("data:"))
-
 			err = json.Unmarshal(line, &result)
 			if err != nil {
 				logs.Error(context.Background(), "umarshal response body failed", zap.String("error", err.Error()))
@@ -127,7 +122,6 @@ func Chat(req *model.Request, fn func(*model.Response)) error {
 			respe.Content = result.Content
 			respe.Stop = result.Stop
 			mess.Content += result.Content
-			fmt.Println(respe.Content)
 			fn(respe)
 			if result.Stop {
 				respe.Stop = true

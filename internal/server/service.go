@@ -31,7 +31,7 @@ func (*Server) Service() {
 	v1.RegisterUserServer(server, business.NewUserManager())
 	v1.RegisterChatServer(server, business.NewChatManager())
 	logs.Info(context.Background(), "服务注册成功")
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", "192.168.184.129", config.GetConfig().Port))
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", "0.0.0.0", config.GetConfig().Port))
 	if err != nil {
 		logs.Fatal(context.Background(), "failed to listen:")
 	}

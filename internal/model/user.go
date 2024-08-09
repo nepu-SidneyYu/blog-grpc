@@ -4,7 +4,7 @@ type UserAuth struct {
 	ID            int    `gorm:"primary_key;auto_increment;column:id" json:"id"`
 	Phone         string `gorm:"uniqueIndex;type:varchar(20);column:phone;not null" json:"phone"`
 	Username      string `gorm:"uniqueIndex;type:varchar(50);column:username;not null" json:"userName"`
-	Email         string `gorm:"uniqueIndex;type:varchar(50);column:email" json:"email"`
+	Email         string `gorm:"index:idx_user_email;type:varchar(50);column:email;not null" json:"email"`
 	Password      string `gorm:"type:varchar(100);column:password;not null" json:"-"`
 	LoginType     int    `gorm:"column:login_type;type:tinyint(1);comment:登录类型" json:"login_ype"`
 	IpAddress     string `gorm:"type:varchar(20);comment:登录IP地址;column:ip_address" json:"ip_address"`

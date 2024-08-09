@@ -414,9 +414,10 @@ var User_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	Chat_CreateSession_FullMethodName = "/proto.Chat/CreateSession"
-	Chat_CloseSession_FullMethodName  = "/proto.Chat/CloseSession"
-	Chat_Chat_FullMethodName          = "/proto.Chat/Chat"
+	Chat_CreateSession_FullMethodName  = "/proto.Chat/CreateSession"
+	Chat_DeleteSession_FullMethodName  = "/proto.Chat/DeleteSession"
+	Chat_Chat_FullMethodName           = "/proto.Chat/Chat"
+	Chat_GetChatHistory_FullMethodName = "/proto.Chat/GetChatHistory"
 )
 
 // ChatClient is the client API for Chat service.
@@ -424,8 +425,9 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChatClient interface {
 	CreateSession(ctx context.Context, in *CreateSessionRequest, opts ...grpc.CallOption) (*CreateSessionResponse, error)
-	CloseSession(ctx context.Context, in *CloseSessionRequest, opts ...grpc.CallOption) (*CloseSessionResponse, error)
+	DeleteSession(ctx context.Context, in *DeleteSessionRequest, opts ...grpc.CallOption) (*DeleteSessionResponse, error)
 	Chat(ctx context.Context, in *ChatRequest, opts ...grpc.CallOption) (Chat_ChatClient, error)
+	GetChatHistory(ctx context.Context, in *GetChatHistoryRequest, opts ...grpc.CallOption) (*GetChatHistoryResponse, error)
 }
 
 type chatClient struct {
@@ -446,10 +448,10 @@ func (c *chatClient) CreateSession(ctx context.Context, in *CreateSessionRequest
 	return out, nil
 }
 
-func (c *chatClient) CloseSession(ctx context.Context, in *CloseSessionRequest, opts ...grpc.CallOption) (*CloseSessionResponse, error) {
+func (c *chatClient) DeleteSession(ctx context.Context, in *DeleteSessionRequest, opts ...grpc.CallOption) (*DeleteSessionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CloseSessionResponse)
-	err := c.cc.Invoke(ctx, Chat_CloseSession_FullMethodName, in, out, cOpts...)
+	out := new(DeleteSessionResponse)
+	err := c.cc.Invoke(ctx, Chat_DeleteSession_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -489,13 +491,24 @@ func (x *chatChatClient) Recv() (*ChatResponse, error) {
 	return m, nil
 }
 
+func (c *chatClient) GetChatHistory(ctx context.Context, in *GetChatHistoryRequest, opts ...grpc.CallOption) (*GetChatHistoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetChatHistoryResponse)
+	err := c.cc.Invoke(ctx, Chat_GetChatHistory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChatServer is the server API for Chat service.
 // All implementations must embed UnimplementedChatServer
 // for forward compatibility
 type ChatServer interface {
 	CreateSession(context.Context, *CreateSessionRequest) (*CreateSessionResponse, error)
-	CloseSession(context.Context, *CloseSessionRequest) (*CloseSessionResponse, error)
+	DeleteSession(context.Context, *DeleteSessionRequest) (*DeleteSessionResponse, error)
 	Chat(*ChatRequest, Chat_ChatServer) error
+	GetChatHistory(context.Context, *GetChatHistoryRequest) (*GetChatHistoryResponse, error)
 	mustEmbedUnimplementedChatServer()
 }
 
@@ -506,11 +519,14 @@ type UnimplementedChatServer struct {
 func (UnimplementedChatServer) CreateSession(context.Context, *CreateSessionRequest) (*CreateSessionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateSession not implemented")
 }
-func (UnimplementedChatServer) CloseSession(context.Context, *CloseSessionRequest) (*CloseSessionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CloseSession not implemented")
+func (UnimplementedChatServer) DeleteSession(context.Context, *DeleteSessionRequest) (*DeleteSessionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteSession not implemented")
 }
 func (UnimplementedChatServer) Chat(*ChatRequest, Chat_ChatServer) error {
 	return status.Errorf(codes.Unimplemented, "method Chat not implemented")
+}
+func (UnimplementedChatServer) GetChatHistory(context.Context, *GetChatHistoryRequest) (*GetChatHistoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetChatHistory not implemented")
 }
 func (UnimplementedChatServer) mustEmbedUnimplementedChatServer() {}
 
@@ -543,20 +559,20 @@ func _Chat_CreateSession_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Chat_CloseSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CloseSessionRequest)
+func _Chat_DeleteSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteSessionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChatServer).CloseSession(ctx, in)
+		return srv.(ChatServer).DeleteSession(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Chat_CloseSession_FullMethodName,
+		FullMethod: Chat_DeleteSession_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).CloseSession(ctx, req.(*CloseSessionRequest))
+		return srv.(ChatServer).DeleteSession(ctx, req.(*DeleteSessionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -582,6 +598,24 @@ func (x *chatChatServer) Send(m *ChatResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Chat_GetChatHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetChatHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).GetChatHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Chat_GetChatHistory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).GetChatHistory(ctx, req.(*GetChatHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Chat_ServiceDesc is the grpc.ServiceDesc for Chat service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -594,8 +628,12 @@ var Chat_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Chat_CreateSession_Handler,
 		},
 		{
-			MethodName: "CloseSession",
-			Handler:    _Chat_CloseSession_Handler,
+			MethodName: "DeleteSession",
+			Handler:    _Chat_DeleteSession_Handler,
+		},
+		{
+			MethodName: "GetChatHistory",
+			Handler:    _Chat_GetChatHistory_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

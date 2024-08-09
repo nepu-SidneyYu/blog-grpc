@@ -38,6 +38,8 @@ func Init() {
 		// 自动迁移数据库表结构
 		err = _db.AutoMigrate(
 			&model.UserAuth{},
+			&model.Session{},
+			&model.Chat{},
 		)
 		// 如果迁移失败，则输出错误信息并退出程序
 		if err != nil {

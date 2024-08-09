@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"time"
 
 	//"github.com/nacos-group/nacos-sdk-go/v2/api/grpc"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/interceptor"
@@ -28,18 +27,17 @@ func main() {
 	}
 	defer conn.Close()
 	clientChat := blog.NewChatClient(conn)
-	userclient := blog.NewUserClient(conn)
-	go chatresponse(clientChat, &blog.ChatRequest{Content: "将进酒"}, 1)
-	go chatresponse(clientChat, &blog.ChatRequest{Content: "蜀道难"}, 2)
-	time.Sleep(time.Second * 5)
-	go userresponse(userclient, &blog.UserRegisterRequest{Phone: "123456789", Password: "123456", Code: "000000"})
-
+	//userclient := blog.NewUserClient(conn)
+	go chatresponse(clientChat, &blog.ChatRequest{Content: "写一篇800字的关于母亲的作文"})
+	//go chatresponse(clientChat, &blog.ChatRequest{Content: "蜀道难"}, 2)
+	//time.Sleep(time.Second * 5)
+	//go userresponse(userclient, &blog.UserRegisterRequest{Phone: "123456789", Password: "123456", Code: "000000"})
 	for {
 
 	}
 }
 
-func chatresponse(client blog.ChatClient, req *blog.ChatRequest, reqnum int32) {
+func chatresponse(client blog.ChatClient, req *blog.ChatRequest) {
 	stream, err := client.Chat(context.Background(), req)
 	if err != nil {
 		logs.Error(context.Background(), "failed to chat", zap.String("err", err.Error()))
@@ -53,7 +51,7 @@ func chatresponse(client blog.ChatClient, req *blog.ChatRequest, reqnum int32) {
 		if err != nil {
 			logs.Error(context.Background(), "failed to receive message", zap.String("err", err.Error()))
 		}
-		logs.Info(context.Background(), "receive message", zap.String("request", fmt.Sprintf("%#v\n", reqnum)), zap.String("message", resp.Content))
+		logs.Info(context.Background(), "receive message", zap.String("message", resp.Content))
 	}
 }
 

@@ -108,7 +108,7 @@ service User{
 }
 
 message CreateSessionRequest{
-    google.protobuf.Empty data = 1;
+    int32 userId = 1;
 }
 message CreateSessionResponse{
     int32 code = 1;
@@ -117,17 +117,19 @@ message CreateSessionResponse{
 }
 message SessionInfo{
     string sessionId = 1;
+    string sessionName = 2;
 }
-message CloseSessionRequest {
+message DeleteSessionRequest {
     string sessionId = 1;
 }
-message CloseSessionResponse{
+message DeleteSessionResponse{
     int32 code = 1;
     string msg = 2;
     google.protobuf.Empty data = 3;
 }
 
 message  ChatRequest{
+    string sessionId = 1;
     string content = 2;
 }
 
@@ -136,13 +138,24 @@ message ChatResponse{
     string msg = 2;
     string content = 3;
 }
-message Question{
-    string role = 1;
-    string content = 2;
+message GetChatHistoryRequest{
+    string sessionId = 1;
 }
+message GetChatHistoryResponse {
+    int32 code = 1;
+    string msg = 2;
+    repeated ChatHistoryInfo data = 3; 
+}
+message ChatHistoryInfo {
+    string question = 1;
+    string answer = 2;
+}
+
+
 service Chat{
     rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse){}
-    rpc CloseSession(CloseSessionRequest) returns (CloseSessionResponse){}
+    rpc DeleteSession(DeleteSessionRequest) returns (DeleteSessionResponse){}
     rpc Chat(ChatRequest) returns (stream ChatResponse){}
+    rpc GetChatHistory(GetChatHistoryRequest) returns (GetChatHistoryResponse){}
 }
 

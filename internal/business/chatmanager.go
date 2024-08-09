@@ -1,6 +1,8 @@
 package business
 
 import (
+	"context"
+
 	"github.com/nepu-SidneyYu/blog-grpc/internal/consts"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/logs"
 	"github.com/nepu-SidneyYu/blog-grpc/internal/model"
@@ -11,6 +13,30 @@ import (
 
 type ChatManager struct {
 	blog.UnimplementedChatServer
+}
+
+type (
+	CreateSessionResponseFun func(c *blog.CreateSessionResponse)
+)
+
+func newCreateSessionResponse(s ...CreateSessionResponseFun) *blog.CreateSessionResponse {
+	cp := &blog.CreateSessionResponse{
+		Code: int32(consts.BindEmailErrCode),
+		Msg:  consts.CreateSessionErr.Error(),
+		Data: nil,
+	}
+	for _, f := range s {
+		f(cp)
+	}
+	return cp
+}
+
+func withCreateSessionResponse(code int32, msg string, data *blog.SessionInfo) CreateSessionResponseFun {
+	return func(c *blog.CreateSessionResponse) {
+		c.Code = code
+		c.Msg = msg
+		c.Data = data
+	}
 }
 
 func NewChatManager() *ChatManager { return &ChatManager{} }
@@ -28,17 +54,12 @@ func (c *ChatManager) Chat(req *blog.ChatRequest, stream blog.Chat_ChatServer) e
 		Role:    "user",
 		Content: req.Content,
 	})
-	// for i := 0; i < 500; i++ {
-	// 	time.Sleep(500 * time.Millisecond)
-	// 	if err := stream.Send(&blog.ChatResponse{Code: consts.StatusOK, Msg: consts.StatusSuccess, Content: strconv.Itoa(i + 1)}); err != nil {
-	// 		logs.Error(stream.Context(), "stream send error", zap.String("error", err.Error()))
-	// 	}
-	// }
-	//
 	done := make(chan bool)
 	go utils.Chat(request, func(r *model.Response) {
-		if err := stream.Send(&blog.ChatResponse{Code: consts.StatusOK, Msg: consts.StatusSuccess, Content: r.Content}); err != nil {
+		err := stream.Send(&blog.ChatResponse{Code: consts.StatusOK, Msg: consts.StatusSuccess, Content: r.Content})
+		if err != nil {
 			logs.Error(stream.Context(), "stream send error", zap.String("error", err.Error()))
+			return
 		}
 		if r.Stop {
 			done <- true
@@ -59,6 +80,21 @@ func (c *ChatManager) Chat(req *blog.ChatRequest, stream blog.Chat_ChatServer) e
 	// 	//time.Sleep(1 * time.Second)
 	// })
 	return nil
+}
+
+func (c *ChatManager) CreateSession(ctx context.Context, req *blog.CreateSessionRequest) (*blog.CreateSessionResponse, error) {
+	if req.UserId == 0 {
+		logs.Error(ctx, "create session error", zap.String("error", "user id is empty"))
+		return newCreateSessionResponse(), nil
+	}
+	id := utils.NewStringID()
+	session := &model.Session{
+		SessionID:   id,
+		SessionName: "",
+		UserID:      int(req.UserId),
+	}
+
+	return &blog.CreateSessionResponse{Code: consts.StatusOK, Msg: consts.StatusSuccess, ID: id}
 }
 
 // package main
